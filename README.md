@@ -1,6 +1,6 @@
 # HydraProtocol
 
-> 基于零知识证明的去中心化隐私数据市场
+> Decentralized Privacy Data Marketplace Based on Zero-Knowledge Proofs
 
 <div align="center">
 
@@ -9,251 +9,271 @@
 [![ZK-SNARKs](https://img.shields.io/badge/ZK--SNARKs-Groth16-purple)](https://github.com/iden3/snarkjs)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[English](./README_EN.md) | 简体中文
+English | [简体中文](./README.md)
 
 </div>
 
-## 📖 项目简介
+## 📖 Project Overview
 
-HydraProtocol 是一个去中心化的隐私数据市场，允许数据所有者安全地共享和交易敏感数据，同时通过零知识证明技术确保数据在使用过程中的隐私性。
+HydraProtocol is a decentralized privacy data marketplace that allows data owners to securely share and trade sensitive data while ensuring privacy during data usage through zero-knowledge proof technology.
 
-### 核心特性
+### Core Features
 
-- 🔐 **端到端加密**: 使用 AES-256-GCM 加密数据，X25519 ECDH 安全分发密钥
-- 🔍 **零知识证明**: 基于 Groth16 的链上验证，支持隐私计算（平均值、阈值查询）
-- 🌊 **去中心化存储**: Walrus 提供高可靠性的 Blob 存储（5x 冗余）
-- ⚡ **低延迟交易**: Sui 区块链提供快速、低成本的智能合约执行
-- 💰 **激励机制**: 内置质押系统和验证者奖励分配
+- 🔐 **End-to-End Encryption**: AES-256-GCM data encryption with X25519 ECDH secure key distribution
+- 🔍 **Zero-Knowledge Proofs**: Groth16-based on-chain verification supporting privacy computations (average, threshold queries)
+- 🌊 **Decentralized Storage**: Walrus provides highly reliable Blob storage (5x redundancy)
+- ⚡ **Low-Latency Transactions**: Sui blockchain offers fast, low-cost smart contract execution
+- 💰 **Incentive Mechanisms**: Built-in staking system and validator reward distribution
 
-### 应用场景
+### Application Scenarios
 
-- 🏥 **医疗数据协作**: HIPAA 合规的患者数据统计分析
-- 💼 **金融风控**: 敏感交易数据的隐私保护计算
-- 🔬 **科研数据共享**: 保护知识产权的同时促进学术协作
-- 📊 **联合数据分析**: 多方数据统计，无需暴露原始数据
+- 🏥 **Medical Data Collaboration**: HIPAA-compliant patient data statistical analysis
+- 💼 **Financial Risk Control**: Privacy-preserving computation on sensitive transaction data
+- 🔬 **Research Data Sharing**: Facilitate academic collaboration while protecting intellectual property
+- 📊 **Federated Data Analysis**: Multi-party data statistics without exposing raw data
 
 ---
 
-## 🌟 核心创新点
+## 🌟 Core Innovations
 
-### 1. **全球首个 Sui + Walrus + zkSNARKs 全栈集成方案**
+### 1. **World's First Sui + Walrus + zkSNARKs Full-Stack Integration**
 
-**技术突破**：
-- ✅ 首次将 Walrus 去中心化存储与 Sui 原生 Groth16 验证器深度整合
-- ✅ 浏览器端 ZKP 生成 + 链上验证的完整闭环
-- ✅ 无需中心化计算节点，所有证明在用户本地生成
+**Technical Breakthrough**:
+- ✅ First deep integration of Walrus decentralized storage with Sui native Groth16 verifier
+- ✅ Complete closed-loop of browser-side ZKP generation + on-chain verification
+- ✅ No centralized compute nodes needed; all proofs generated locally by users
 
-**与竞品对比**：
-| 特性 | Ocean Protocol | Streamr | Enigma | **HydraProtocol** |
+**Comparison with Competitors**:
+| Feature | Ocean Protocol | Streamr | Enigma | **HydraProtocol** |
 |------|----------------|---------|--------|-------------------|
-| 存储方案 | IPFS (中心化网关) | 中心化服务器 | 链上存储 | **Walrus (5x冗余)** |
-| 隐私计算 | ❌ 无 | ❌ 无 | MPC (需多方在线) | **ZKP (单方生成)** |
-| 链上验证 | ❌ 无 | ❌ 无 | 部分支持 | **✅ Groth16 原生验证** |
-| 密钥管理 | 中心化托管 | 未加密 | 秘密共享 | **X25519 ECDH** |
-| 区块链 | 以太坊 (慢+贵) | 自建链 | 以太坊 | **Sui (快+便宜)** |
+| Storage | IPFS (centralized gateway) | Centralized servers | On-chain storage | **Walrus (5x redundancy)** |
+| Privacy Computing | ❌ None | ❌ None | MPC (requires multiple parties online) | **ZKP (single-party generation)** |
+| On-chain Verification | ❌ None | ❌ None | Partial support | **✅ Native Groth16 verification** |
+| Key Management | Centralized custody | Unencrypted | Secret sharing | **X25519 ECDH** |
+| Blockchain | Ethereum (slow+expensive) | Custom chain | Ethereum | **Sui (fast+cheap)** |
 
-### 2. **安全的两步式密钥分发机制**
+### 2. **Secure Two-Step Key Distribution Mechanism**
 
-**创新设计**：
+**Innovative Design**:
 ```
-传统方案的问题:
-❌ Ocean Protocol: 密钥集中存储在服务商，单点故障
-❌ 其他方案: 密钥明文上链，任何人可见
+Problems with Traditional Solutions:
+❌ Ocean Protocol: Keys stored centrally by service providers, single point of failure
+❌ Other solutions: Keys stored on-chain in plaintext, visible to everyone
 
-HydraProtocol 的解决方案:
-第一步: 购买交易（链上公开）
-  买家 → 支付 SUI → 获得购买凭证
+HydraProtocol's Solution:
+Step 1: Purchase Transaction (publicly on-chain)
+  Buyer → Pay SUI → Receive purchase certificate
   
-第二步: 密钥分发（链上加密）
-  卖家 → 检测购买事件
-  卖家 → 获取买家 X25519 公钥
-  卖家 → ECDH 加密对称密钥
-  卖家 → 调用 distribute_key_to_buyer 上链
-  买家 → 用私钥解密，获得数据访问权
+Step 2: Key Distribution (encrypted on-chain)
+  Seller → Detect purchase event
+  Seller → Retrieve buyer's X25519 public key
+  Seller → ECDH encrypt symmetric key
+  Seller → Call distribute_key_to_buyer on-chain
+  Buyer → Decrypt with private key to gain data access
 
-安全保证:
-✅ 密钥密文上链，任何第三方无法解密
-✅ 买家的 X25519 私钥存储在浏览器本地，永不上传
-✅ 支持密钥撤销和访问权限过期管理
+Security Guarantees:
+✅ Key ciphertext on-chain, no third party can decrypt
+✅ Buyer's X25519 private key stored locally in browser, never uploaded
+✅ Support key revocation and access permission expiration management
 ```
 
-### 3. **Threshold Query（阈值查询）- 独创的隐私统计方法**
+### 3. **Threshold Query - Original Privacy Statistics Method**
 
-**应用示例**：
+**Application Example**:
 ```
-场景: 某银行想知道客户群体中"年收入 > 50万"的人数比例
+Scenario: A bank wants to know the proportion of customers with "annual income > $500k"
 
-传统SQL查询:
+Traditional SQL Query:
   SELECT COUNT(*) FROM customers WHERE income > 500000;
-  ❌ 问题: 需要访问所有客户的原始收入数据
+  ❌ Problem: Requires access to all customers' raw income data
 
 HydraProtocol Threshold Query:
-  输入 (私有): income_data = [380k, 520k, 450k, 680k, ...]
-  输入 (公开): threshold = 500k
+  Input (Private): income_data = [380k, 520k, 450k, 680k, ...]
+  Input (Public): threshold = 500k
   
-  输出 (公开): count = 3 (表示有3人超过50万)
-  输出 (公开): commitment = hash(income_data)
+  Output (Public): count = 3 (indicating 3 people exceed $500k)
+  Output (Public): commitment = hash(income_data)
   
-  ZKP 证明: "我确实对这些数据执行了阈值统计，结果为3"
+  ZKP Proof: "I did perform threshold statistics on this data, result is 3"
   
-  ✅ 优势: 银行只知道数量，永远无法反推出谁的收入是多少
+  ✅ Advantage: Bank only knows the count, can never reverse-engineer whose income is what
 ```
 
-**技术实现**：
+**Technical Implementation**:
 ```circom
-// threshold.circom 核心逻辑
+// threshold.circom core logic
 component comparators[n];
 for (var i = 0; i < n; i++) {
     comparators[i] = GreaterThan(32);
-    comparators[i].in[0] <== data[i];      // 私有数据
-    comparators[i].in[1] <== threshold;    // 公开阈值
+    comparators[i].in[0] <== data[i];      // private data
+    comparators[i].in[1] <== threshold;    // public threshold
 }
 
-// 累加满足条件的数量
+// Accumulate count of items meeting condition
 var totalCount = 0;
 for (var i = 0; i < n; i++) {
-    totalCount += comparators[i].out;  // 0 或 1
+    totalCount += comparators[i].out;  // 0 or 1
 }
-count <== totalCount;  // 公开输出
+count <== totalCount;  // public output
 ```
 
-### 4. **自动列识别 + 智能数据采样**
+### 4. **Automatic Column Recognition + Intelligent Data Sampling**
 
-**用户体验创新**：
+**User Experience Innovation**:
 ```
-传统数据市场的痛点:
-❌ 需要手动指定数据格式和字段映射
-❌ 不支持预览，买家无法评估数据质量
-❌ 上传后才发现格式不兼容
+Pain Points of Traditional Data Marketplaces:
+❌ Manual specification of data format and field mapping required
+❌ No preview support, buyers cannot evaluate data quality
+❌ Format incompatibility discovered only after upload
 
-HydraProtocol 的自动化方案:
-✅ 上传 CSV/Excel/JSON，自动解析列名和类型
-✅ 智能识别数值列（如"年龄"、"收入"、"血压"）
-✅ 在加密状态下显示数据预览（最大值、最小值、均值）
-✅ 自动采样数据用于 ZKP 计算（无需手动选择）
+HydraProtocol's Automation Solution:
+✅ Upload CSV/Excel/JSON, automatically parse column names and types
+✅ Intelligently identify numeric columns (e.g., "age", "income", "blood pressure")
+✅ Display data preview in encrypted state (max, min, average)
+✅ Automatically sample data for ZKP computation (no manual selection needed)
 
-技术实现:
-1. 前端读取文件 → Papaparse/SheetJS 解析
-2. 识别列类型 → 正则匹配数值/日期/文本
-3. 生成统计摘要 → 不泄露原始数据
-4. 用户选择目标列 → 自动提取数据用于 ZKP
-```
-
-### 5. **浏览器端 ZKP 生成 - 无需服务器**
-
-**技术难点**：
-```
-传统 ZKP 方案的限制:
-❌ 需要高性能服务器生成证明（成本高）
-❌ 用户需要上传原始数据到服务器（隐私风险）
-❌ 证明生成时间长（几分钟到几小时）
-
-HydraProtocol 的浏览器端方案:
-✅ 使用 SnarkJS + WebAssembly 在浏览器生成证明
-✅ 数据永不离开用户设备
-✅ 针对 BN254 曲线优化，10-30秒生成证明
-
-性能优化:
-- 使用 Web Workers 避免阻塞 UI
-- 预编译电路文件（.wasm + .zkey）
-- Groth16 证明大小仅 192 字节，快速上链
+Technical Implementation:
+1. Frontend reads file → Papaparse/SheetJS parsing
+2. Identify column types → Regex matching for numeric/date/text
+3. Generate statistical summary → Without revealing raw data
+4. User selects target column → Automatically extract data for ZKP
 ```
 
-### 6. **完整的代币经济模型**
+### 5. **Browser-Side ZKP Generation - No Server Required**
 
-**费用分配机制**：
+**Technical Challenges**:
+```
+Limitations of Traditional ZKP Solutions:
+❌ Require high-performance servers to generate proofs (high cost)
+❌ Users must upload raw data to servers (privacy risk)
+❌ Long proof generation time (minutes to hours)
+
+HydraProtocol's Browser-Side Solution:
+✅ Use SnarkJS + WebAssembly to generate proofs in browser
+✅ Data never leaves user's device
+✅ Optimized for BN254 curve, 10-30 seconds proof generation
+
+Performance Optimizations:
+- Use Web Workers to avoid blocking UI
+- Precompile circuit files (.wasm + .zkey)
+- Groth16 proof size only 192 bytes, fast on-chain submission
+```
+
+### 6. **Complete Token Economics Model**
+
+**Fee Distribution Mechanism**:
 ```move
-// market.move 核心代码
+// market.move core code
 let platform_fee = (price * 250) / 10000;      // 2.5%
 let verifier_reward = (price * 500) / 10000;   // 5%
 let owner_revenue = price - platform_fee - verifier_reward;  // 92.5%
 
-// 资金流向:
-✅ 数据所有者: 92.5% → 激励高质量数据上传
-✅ 验证者奖励池: 5% → 奖励运行 ZKP 验证的节点
-✅ 平台费: 2.5% → 维护基础设施和开发
+// Fund Flow:
+✅ Data Owner: 92.5% → Incentivize high-quality data uploads
+✅ Verifier Reward Pool: 5% → Reward nodes running ZKP verification
+✅ Platform Fee: 2.5% → Maintain infrastructure and development
 ```
 
-**质押挖矿**：
+**Staking & Mining**:
 ```
-数据提供者质押:
-- 质押 ≥ 1 SUI 到 Marketplace 合约
-- 锁定期 24 小时
-- 年化收益 ~8-12% (根据奖励池动态调整)
-- 提供虚假数据将被罚没质押金
+Data Provider Staking:
+- Stake ≥ 1 SUI to Marketplace contract
+- Lock period: 24 hours
+- APY ~8-12% (dynamically adjusted based on reward pool)
+- Providing fake data results in stake slashing
 
-验证者质押:
-- 质押 ≥ 5 SUI
-- 运行 ZKP 验证节点
-- 从奖励池获得 5% 的交易费分成
-- 验证错误证明将被惩罚
+Validator Staking:
+- Stake ≥ 5 SUI
+- Run ZKP verification nodes
+- Receive 5% transaction fee share from reward pool
+- Penalties for verifying false proofs
 ```
 
 ---
 
-## 🏗️ 技术架构
+## 🏗️ Technical Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              前端 (Next.js + React)                  │
+│              Frontend (Next.js + React)              │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│  │ 数据上传 │  │ 市场浏览 │  │ ZKP计算 │          │
+│  │ Data     │  │ Market   │  │ ZKP      │          │
+│  │ Upload   │  │ Browse   │  │ Compute  │          │
 │  └──────────┘  └──────────┘  └──────────┘          │
 └────────────┬────────────────────────────────────────┘
              │
              │ RPC/GraphQL
              ▼
 ┌─────────────────────────────────────────────────────┐
-│           Sui 区块链 (智能合约层)                    │
+│           Sui Blockchain (Smart Contract Layer)      │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐  │
 │  │DataRegistry │ │ Marketplace │ │ZKP Verifier │  │
 │  │             │ │             │ │             │  │
-│  │ • 元数据    │ │ • 交易市场  │ │ • 电路注册  │  │
-│  │ • 访问控制  │ │ • 费用分配  │ │ • 证明验证  │  │
-│  │ • 密钥管理  │ │ • 质押奖励  │ │ • 链上验证  │  │
+│  │ • Metadata  │ │ • Trading   │ │ • Circuit   │  │
+│  │ • Access    │ │ • Fee       │ │   Registry  │  │
+│  │   Control   │ │   Allocation│ │ • Proof     │  │
+│  │ • Key Mgmt  │ │ • Staking   │ │   Verify    │  │
 │  └─────────────┘ └─────────────┘ └─────────────┘  │
 └────────────┬────────────────────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────────────────────┐
-│          Walrus 分布式存储 (数据层)                  │
+│       Walrus Distributed Storage (Data Layer)        │
 │                                                      │
-│    🗄️ 加密数据 Blob  →  5x 冗余  →  永久存储        │
+│    🗄️ Encrypted Data Blob  →  5x Redundancy  →     │
+│                         Permanent Storage            │
 └─────────────────────────────────────────────────────┘
 
              ▲
-             │ 本地生成 ZKP 证明
+             │ Local ZKP Proof Generation
              │
 ┌─────────────────────────────────────────────────────┐
-│         ZK 电路 (Circom + SnarkJS)                   │
+│         ZK Circuits (Circom + SnarkJS)               │
 │  ┌─────────────┐           ┌─────────────┐         │
 │  │   Average   │           │  Threshold  │         │
-│  │   (平均值)  │           │ (阈值查询)   │         │
+│  │  (Average)  │           │   (Query)   │         │
 │  └─────────────┘           └─────────────┘         │
 └─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 前置要求
+### Prerequisites
 
 - Node.js >= 18
 - Sui CLI >= 1.20.0
 - Circom 2.1.0
 - SnarkJS
 
-### 安装步骤
+### Deployed Contract Addresses
 
-#### 1. 克隆仓库
+The protocol is currently deployed on Sui Testnet with the following addresses:
+
+```bash
+PACKAGE_ID=0xc06de3e29a173a088c5b5f75632e2ef67e9ab1d09e65336589a514d79f1b010d
+DATA_REGISTRY_ID=0x77719a8321b655e54aca1ca819c726647109640ea3e7200deadf1b8544d24137
+MARKETPLACE_ID=0x402c64be994b79de4f565e5d6463191df801535eea82d32e1da67ffa65b37d67
+ZKP_REGISTRY_ID=0x2a5e682613f69ffec125e7accf407abdc11b8289f4d298c019b595466ab698cb
+```
+
+Walrus endpoints:
+- Publisher: `https://publisher.walrus-testnet.walrus.space`
+- Aggregator: `https://aggregator.walrus-testnet.walrus.space`
+
+### Installation Steps
+
+#### 1. Clone Repository
 
 ```bash
 git clone https://github.com/yourusername/HydraProtocol.git
 cd HydraProtocol
 ```
 
-#### 2. 部署智能合约
+#### 2. Deploy Smart Contracts (Optional - Already Deployed)
+
+If you want to deploy your own instance:
 
 ```bash
 cd contracts
@@ -261,9 +281,9 @@ sui move build
 sui client publish --gas-budget 500000000
 ```
 
-记录输出的 `PackageID`、`DataRegistry ID`、`Marketplace ID`、`ZKPRegistry ID`。
+Record the output `PackageID`, `DataRegistry ID`, `Marketplace ID`, `ZKPRegistry ID`.
 
-#### 3. 编译 ZKP 电路
+#### 3. Compile ZKP Circuits
 
 ```bash
 cd circuits
@@ -271,299 +291,314 @@ npm install
 bash build_circuits.sh
 ```
 
-#### 4. 注册电路验证密钥
+#### 4. Register Circuit Verification Keys (Optional - Already Registered)
 
 ```bash
 cd scripts
 npm install
 
-# 设置私钥
-export PRIVATE_KEY=suiprivkey1...  # 您的 Sui 私钥
+# Set private key
+export PRIVATE_KEY=suiprivkey1...  # Your Sui private key
 
-# 修改 register-circuits.ts 中的合约地址
-# 然后执行注册
+# Modify contract addresses in register-circuits.ts
+# Then execute registration
 npm run register-circuits
 ```
 
-#### 5. 启动前端
+#### 5. Start Frontend
 
 ```bash
 cd frontend
 npm install
 
-# 配置环境变量
+# Configure environment variables
 cp .env.example .env.local
-# 编辑 .env.local，填入合约地址
+```
 
+Edit `.env.local` and add the following:
+
+```bash
+NEXT_PUBLIC_PACKAGE_ID=0xc06de3e29a173a088c5b5f75632e2ef67e9ab1d09e65336589a514d79f1b010d
+NEXT_PUBLIC_DATA_REGISTRY_ID=0x77719a8321b655e54aca1ca819c726647109640ea3e7200deadf1b8544d24137
+NEXT_PUBLIC_MARKETPLACE_ID=0x402c64be994b79de4f565e5d6463191df801535eea82d32e1da67ffa65b37d67
+NEXT_PUBLIC_ZKP_REGISTRY_ID=0x2a5e682613f69ffec125e7accf407abdc11b8289f4d298c019b595466ab698cb
+NEXT_PUBLIC_SUI_NETWORK=testnet
+NEXT_PUBLIC_WALRUS_PUBLISHER=https://publisher.walrus-testnet.walrus.space
+NEXT_PUBLIC_WALRUS_AGGREGATOR=https://aggregator.walrus-testnet.walrus.space
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-访问 `http://localhost:3000` 开始使用！
+Visit `http://localhost:3000` to start using!
 
 ---
 
-## 📂 项目结构
+## 📂 Project Structure
 
 ```
 HydraProtocol/
-├── contracts/              # Sui Move 智能合约
+├── contracts/              # Sui Move smart contracts
 │   ├── sources/
-│   │   ├── data_registry.move    # 数据注册与访问控制
-│   │   ├── market.move           # 数据市场与交易
-│   │   └── zkp_verifier.move     # ZKP 验证器
-│   └── tests/              # 合约单元测试
+│   │   ├── data_registry.move    # Data registration & access control
+│   │   ├── market.move           # Data marketplace & trading
+│   │   └── zkp_verifier.move     # ZKP verifier
+│   └── tests/              # Contract unit tests
 │
-├── circuits/               # Circom ZKP 电路
+├── circuits/               # Circom ZKP circuits
 │   ├── src/
-│   │   ├── average.circom        # 平均值计算电路
-│   │   └── threshold.circom      # 阈值查询电路
-│   └── build/              # 编译产物（.wasm, .zkey, vk.json）
+│   │   ├── average.circom        # Average computation circuit
+│   │   └── threshold.circom      # Threshold query circuit
+│   └── build/              # Build artifacts (.wasm, .zkey, vk.json)
 │
-├── frontend/               # Next.js 前端应用
+├── frontend/               # Next.js frontend application
 │   ├── src/
-│   │   ├── app/            # 页面路由
-│   │   ├── components/     # React 组件
-│   │   ├── hooks/          # 自定义 Hooks
-│   │   └── utils/          # 工具函数（ZKP、加密、Walrus）
-│   └── public/circuits/    # 浏览器端 ZKP 电路文件
+│   │   ├── app/            # Page routes
+│   │   ├── components/     # React components
+│   │   ├── hooks/          # Custom Hooks
+│   │   └── utils/          # Utility functions (ZKP, encryption, Walrus)
+│   └── public/circuits/    # Browser-side ZKP circuit files
 │
-├── scripts/                # 部署与测试脚本
-│   ├── register-circuits.ts     # 电路注册脚本
-│   └── create-listings.ts       # 创建示例数据挂牌
+├── scripts/                # Deployment & testing scripts
+│   ├── register-circuits.ts     # Circuit registration script
+│   └── create-listings.ts       # Create sample data listings
 │
-└── sdk/                    # TypeScript SDK（可选）
+└── sdk/                    # TypeScript SDK (optional)
     └── typescript/
 ```
 
 ---
 
-## 🔄 完整工作流程详解
+## 🔄 Complete Workflow Explanation
 
-### 数据生命周期全流程
+### Data Lifecycle Full Process
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                    第1阶段: 数据上传与注册                          │
+│                   Phase 1: Data Upload & Registration             │
 └──────────────────────────────────────────────────────────────────┘
 
-医院A (数据所有者)
+Hospital A (Data Owner)
   │
-  ├─ 1. 准备数据文件 (patients.csv)
-  │    ├─ 包含: 患者ID, 年龄, 性别, 恢复天数等
-  │    └─ 示例: 30条患者记录
+  ├─ 1. Prepare data file (patients.csv)
+  │    ├─ Contains: Patient ID, Age, Gender, Recovery Days, etc.
+  │    └─ Example: 30 patient records
   │
-  ├─ 2. 浏览器自动加密
-  │    ├─ 生成随机 AES-256-GCM 密钥 (256-bit)
-  │    ├─ 加密整个CSV文件 → encrypted_blob
-  │    └─ 计算SHA-256哈希 → data_hash
+  ├─ 2. Automatic browser encryption
+  │    ├─ Generate random AES-256-GCM key (256-bit)
+  │    ├─ Encrypt entire CSV file → encrypted_blob
+  │    └─ Calculate SHA-256 hash → data_hash
   │
-  ├─ 3. 上传到 Walrus
+  ├─ 3. Upload to Walrus
   │    ├─ POST encrypted_blob → Walrus Aggregator
-  │    ├─ Walrus进行纠删码编码 (5x冗余)
-  │    └─ 返回 Blob ID: "PuwNOqjRj0mh..."
+  │    ├─ Walrus performs erasure coding (5x redundancy)
+  │    └─ Returns Blob ID: "PuwNOqjRj0mh..."
   │
-  ├─ 4. 链上注册元数据
-  │    ├─ 调用 data_registry::register_data
-  │    ├─ 参数: (blob_id, data_hash, size, type, description)
-  │    ├─ 存储 AES密钥到 localStorage (前端本地)
-  │    └─ Sui链创建 DataRecord 对象
+  ├─ 4. Register metadata on-chain
+  │    ├─ Call data_registry::register_data
+  │    ├─ Parameters: (blob_id, data_hash, size, type, description)
+  │    ├─ Store AES key to localStorage (frontend local)
+  │    └─ Sui chain creates DataRecord object
   │
-  └─ 5. 挂牌到市场
-       ├─ 调用 market::list_data
-       ├─ 设置价格: 10 SUI
-       └─ 创建 DataListing 对象
+  └─ 5. List on marketplace
+       ├─ Call market::list_data
+       ├─ Set price: 10 SUI
+       └─ Create DataListing object
 
 
 ┌──────────────────────────────────────────────────────────────────┐
-│                    第2阶段: 数据购买与密钥分发                      │
+│               Phase 2: Data Purchase & Key Distribution           │
 └──────────────────────────────────────────────────────────────────┘
 
-医院B (数据消费者)
+Hospital B (Data Consumer)
   │
-  ├─ 1. 浏览市场
-  │    ├─ 查看 DataListing 列表
-  │    ├─ 筛选: 类型=medical, 价格<15 SUI
-  │    └─ 预览: 数据大小、描述、评分
+  ├─ 1. Browse marketplace
+  │    ├─ View DataListing list
+  │    ├─ Filter: type=medical, price<15 SUI
+  │    └─ Preview: data size, description, rating
   │
-  ├─ 2. 生成 X25519 密钥对 (浏览器本地)
-  │    ├─ 私钥: 存储在 localStorage (永不上传)
-  │    ├─ 公钥: 注册到 DataRegistry.user_keys
-  │    └─ 用于后续接收加密的 AES 密钥
+  ├─ 2. Generate X25519 key pair (browser local)
+  │    ├─ Private key: stored in localStorage (never uploaded)
+  │    ├─ Public key: registered to DataRegistry.user_keys
+  │    └─ Used to receive encrypted AES key
   │
-  ├─ 3. 购买数据访问权
-  │    ├─ 调用 market::purchase_data_access
-  │    ├─ 支付: 10 SUI
-  │    ├─ 费用分配:
-  │    │   ├─ 医院A获得: 9.25 SUI (92.5%)
-  │    │   ├─ 奖励池: 0.5 SUI (5%)
-  │    │   └─ 平台费: 0.25 SUI (2.5%)
-  │    └─ 创建 Purchase 对象 → 转移给医院B
+  ├─ 3. Purchase data access
+  │    ├─ Call market::purchase_data_access
+  │    ├─ Payment: 10 SUI
+  │    ├─ Fee distribution:
+  │    │   ├─ Hospital A receives: 9.25 SUI (92.5%)
+  │    │   ├─ Reward pool: 0.5 SUI (5%)
+  │    │   └─ Platform fee: 0.25 SUI (2.5%)
+  │    └─ Create Purchase object → Transfer to Hospital B
   │
-  ├─ 4. 等待密钥分发
-  │    └─ 监听 KeyDistributed 事件
+  ├─ 4. Wait for key distribution
+  │    └─ Listen for KeyDistributed event
   │
-医院A (自动触发)
+Hospital A (Auto-triggered)
   │
-  ├─ 5. 检测购买事件 (useAutoDistributeKeys hook)
-  │    ├─ 监听 DataPurchased 事件
-  │    ├─ 验证: listing.purchasers[医院B] = true
-  │    └─ 触发密钥分发流程
+  ├─ 5. Detect purchase event (useAutoDistributeKeys hook)
+  │    ├─ Listen for DataPurchased event
+  │    ├─ Verify: listing.purchasers[Hospital B] = true
+  │    └─ Trigger key distribution process
   │
-  ├─ 6. 加密密钥分发
-  │    ├─ 从 localStorage 读取原始 AES 密钥
-  │    ├─ 从链上读取医院B的 X25519 公钥
-  │    ├─ ECDH 密钥交换: 
-  │    │   shared_secret = ECDH(医院A_私钥, 医院B_公钥)
-  │    ├─ 加密 AES 密钥:
-  │    │   encrypted_key = XChaCha20Poly1305(AES密钥, shared_secret)
-  │    └─ 调用 market::distribute_key_to_buyer
-  │        ├─ 参数: (listing, data_record, 医院B, encrypted_key)
-  │        └─ 链上存储: data_record.encryption_keys[医院B] = encrypted_key
+  ├─ 6. Encrypted key distribution
+  │    ├─ Read original AES key from localStorage
+  │    ├─ Read Hospital B's X25519 public key from chain
+  │    ├─ ECDH key exchange: 
+  │    │   shared_secret = ECDH(Hospital A_privkey, Hospital B_pubkey)
+  │    ├─ Encrypt AES key:
+  │    │   encrypted_key = XChaCha20Poly1305(AES_key, shared_secret)
+  │    └─ Call market::distribute_key_to_buyer
+  │        ├─ Parameters: (listing, data_record, Hospital B, encrypted_key)
+  │        └─ Store on-chain: data_record.encryption_keys[Hospital B] = encrypted_key
   │
-医院B (获得访问权)
+Hospital B (Gains Access)
   │
-  └─ 7. 解密获得 AES 密钥
-       ├─ 读取 KeyDistributed 事件中的 encrypted_key
-       ├─ ECDH 解密:
-       │   shared_secret = ECDH(医院B_私钥, 医院A_公钥)
-       │   AES密钥 = XChaCha20Poly1305_decrypt(encrypted_key, shared_secret)
-       └─ 现在可以下载并解密原始数据
+  └─ 7. Decrypt to obtain AES key
+       ├─ Read encrypted_key from KeyDistributed event
+       ├─ ECDH decryption:
+       │   shared_secret = ECDH(Hospital B_privkey, Hospital A_pubkey)
+       │   AES_key = XChaCha20Poly1305_decrypt(encrypted_key, shared_secret)
+       └─ Now can download and decrypt original data
 
 
 ┌──────────────────────────────────────────────────────────────────┐
-│                  第3阶段: 隐私计算与零知识证明                       │
+│            Phase 3: Privacy Computing & Zero-Knowledge Proofs     │
 └──────────────────────────────────────────────────────────────────┘
 
-医院B (执行隐私计算)
+Hospital B (Execute Privacy Computation)
   │
-  ├─ 1. 下载加密数据
-  │    ├─ 从 Walrus 下载 Blob ID: "PuwNOqjRj0mh..."
-  │    └─ 获得 encrypted_blob (278 bytes)
+  ├─ 1. Download encrypted data
+  │    ├─ Download from Walrus Blob ID: "PuwNOqjRj0mh..."
+  │    └─ Obtain encrypted_blob (278 bytes)
   │
-  ├─ 2. 解密数据
-  │    ├─ 使用之前获得的 AES 密钥
-  │    ├─ 解密: AES-256-GCM.decrypt(encrypted_blob, AES密钥)
-  │    └─ 得到原始 CSV: patients.csv
+  ├─ 2. Decrypt data
+  │    ├─ Use previously obtained AES key
+  │    ├─ Decrypt: AES-256-GCM.decrypt(encrypted_blob, AES_key)
+  │    └─ Get original CSV: patients.csv
   │
-  ├─ 3. 自动列识别
-  │    ├─ 解析 CSV 列: [ID, 姓名, 年龄, 性别, 恢复天数]
-  │    ├─ 识别数值列: [年龄, 恢复天数]
-  │    └─ 用户选择目标列: "年龄"
+  ├─ 3. Automatic column recognition
+  │    ├─ Parse CSV columns: [ID, Name, Age, Gender, Recovery Days]
+  │    ├─ Identify numeric columns: [Age, Recovery Days]
+  │    └─ User selects target column: "Age"
   │
-  ├─ 4. 提取数据用于 ZKP
-  │    ├─ 读取"年龄"列: [45, 38, 62, ...]
-  │    ├─ 随机采样 3 个数据点: [45, 38, 62]
-  │    └─ 准备电路输入: { data: [45, 38, 62] }
+  ├─ 4. Extract data for ZKP
+  │    ├─ Read "Age" column: [45, 38, 62, ...]
+  │    ├─ Random sample 3 data points: [45, 38, 62]
+  │    └─ Prepare circuit input: { data: [45, 38, 62] }
   │
-  ├─ 5. 浏览器端生成 ZKP 证明 (10-30秒)
-  │    ├─ 加载电路: average.wasm + circuit_final.zkey
-  │    ├─ 使用 SnarkJS 生成 Witness:
+  ├─ 5. Browser-side ZKP proof generation (10-30 seconds)
+  │    ├─ Load circuit: average.wasm + circuit_final.zkey
+  │    ├─ Generate Witness using SnarkJS:
   │    │   witness = calculateWitness(average.wasm, {data: [45,38,62]})
-  │    ├─ 生成 Groth16 证明:
+  │    ├─ Generate Groth16 proof:
   │    │   proof = groth16.prove(circuit_final.zkey, witness)
   │    │   publicSignals = [avg, commitment]
-  │    │     - avg = 48 (平均值)
+  │    │     - avg = 48 (average)
   │    │     - commitment = Poseidon([45, 38, 62])
-  │    └─ 序列化证明: proof_bytes (192 bytes)
+  │    └─ Serialize proof: proof_bytes (192 bytes)
   │
-  ├─ 6. 提交证明到链上
-  │    ├─ 调用 zkp_verifier::submit_proof_authorized
-  │    ├─ 参数: (data_record, proof, publicSignals, "average")
-  │    ├─ 访问权限检查:
-  │    │   ✅ has_encrypted_key_for(data_record, 医院B) = true
-  │    └─ 创建 ComputationResult 对象 (verified=false)
+  ├─ 6. Submit proof on-chain
+  │    ├─ Call zkp_verifier::submit_proof_authorized
+  │    ├─ Parameters: (data_record, proof, publicSignals, "average")
+  │    ├─ Access permission check:
+  │    │   ✅ has_encrypted_key_for(data_record, Hospital B) = true
+  │    └─ Create ComputationResult object (verified=false)
   │
-  └─ 7. 链上验证 ZKP
-       ├─ 调用 zkp_verifier::verify_proof
-       ├─ Sui 原生 Groth16 验证器执行验证 (<1ms)
-       ├─ 验证通过:
+  └─ 7. On-chain ZKP verification
+       ├─ Call zkp_verifier::verify_proof
+       ├─ Sui native Groth16 verifier executes verification (<1ms)
+       ├─ Verification passed:
        │   ├─ result.verified = true
-       │   ├─ 触发 ProofVerified 事件
-       │   └─ 链上永久记录计算结果
-       └─ 前端展示:
-           "✅ 计算成功并验证！
-            平均值: 48.33
-            计算数据: [45, 38, 62]
-            承诺: 2163832386098297...
-            提交TX: BPZsEcwwe1ut...
-            验证TX: EbtAZwZGjMYd...
-            ✨ 状态: VERIFIED"
+       │   ├─ Trigger ProofVerified event
+       │   └─ Permanently record computation result on-chain
+       └─ Frontend display:
+           "✅ Computation successful and verified!
+            Average: 48.33
+            Computed data: [45, 38, 62]
+            Commitment: 2163832386098297...
+            Submit TX: BPZsEcwwe1ut...
+            Verify TX: EbtAZwZGjMYd...
+            ✨ Status: VERIFIED"
 
 
 ┌──────────────────────────────────────────────────────────────────┐
-│                  第4阶段: 结果查询与审计追踪                        │
+│             Phase 4: Result Query & Audit Trail                   │
 └──────────────────────────────────────────────────────────────────┘
 
-任何用户 (公开访问)
+Any User (Public Access)
   │
-  ├─ 1. 查询计算历史
-  │    ├─ 读取 ProofVerified 事件
-  │    ├─ 筛选: circuit_name = "average"
-  │    └─ 展示: 验证时间、公开输入、数据ID
+  ├─ 1. Query computation history
+  │    ├─ Read ProofVerified events
+  │    ├─ Filter: circuit_name = "average"
+  │    └─ Display: verification time, public inputs, data ID
   │
-  ├─ 2. 验证链上证明
-  │    ├─ 读取 ComputationResult 对象
-  │    ├─ 检查: result.verified = true
-  │    └─ 确认: 结果未被篡改
+  ├─ 2. Verify on-chain proofs
+  │    ├─ Read ComputationResult object
+  │    ├─ Check: result.verified = true
+  │    └─ Confirm: result not tampered with
   │
-  └─ 3. 审计追踪
-       ├─ DataRegistered: 数据何时上传
-       ├─ DataPurchased: 谁购买了数据
-       ├─ KeyDistributed: 密钥分发时间
-       ├─ ProofSubmitted: 证明提交记录
-       └─ ProofVerified: 验证结果
+  └─ 3. Audit trail
+       ├─ DataRegistered: when data was uploaded
+       ├─ DataPurchased: who purchased the data
+       ├─ KeyDistributed: key distribution time
+       ├─ ProofSubmitted: proof submission record
+       └─ ProofVerified: verification result
 
 ```
 
 ---
 
-## 💡 核心功能说明
+## 💡 Core Functionality Explanation
 
-### 1. 数据上传与加密
-
-```typescript
-// 前端自动执行
-1. 选择文件（CSV/JSON/Excel）
-2. AES-256-GCM 加密原始数据
-3. 上传加密 Blob 到 Walrus
-4. 在 Sui 链上注册元数据（BlobID、哈希、大小等）
-5. 本地存储加密密钥（用于后续分发）
-```
-
-### 2. 数据购买与密钥分发
+### 1. Data Upload & Encryption
 
 ```typescript
-// 安全的密钥分发机制
-1. 买家在市场购买数据访问权限
-2. 支付 SUI（90% 给卖家，7.5% 平台费，2.5% 奖励池）
-3. 卖家检测到购买事件
-4. 使用买家的 X25519 公钥加密对称密钥
-5. 调用 distribute_key_to_buyer 分发加密密钥
-6. 买家使用私钥解密，获得数据访问能力
+// Frontend automatic execution
+1. Select file (CSV/JSON/Excel)
+2. AES-256-GCM encrypt raw data
+3. Upload encrypted Blob to Walrus
+4. Register metadata on Sui chain (BlobID, hash, size, etc.)
+5. Store encryption key locally (for future distribution)
 ```
 
-### 3. 零知识证明计算
+### 2. Data Purchase & Key Distribution
 
-#### Average（平均值计算）
+```typescript
+// Secure key distribution mechanism
+1. Buyer purchases data access rights on marketplace
+2. Pay SUI (92.5% to seller, 2.5% platform fee, 5% reward pool)
+3. Seller detects purchase event
+4. Encrypt symmetric key using buyer's X25519 public key
+5. Call distribute_key_to_buyer to distribute encrypted key
+6. Buyer decrypts with private key to gain data access
+```
+
+### 3. Zero-Knowledge Proof Computation
+
+#### Average (Average Computation)
 
 ```circom
-// 输入: 私有数据 [45, 38, 62]
-// 输出: 平均值 = 48.33 (公开)
-//       承诺 = hash(data) (公开，用于验证数据完整性)
-// 优势: 不泄露任何原始数据
+// Input: private data [45, 38, 62]
+// Output: average = 48.33 (public)
+//         commitment = hash(data) (public, for data integrity verification)
+// Advantage: Does not leak any original data
 ```
 
-#### Threshold Query（阈值查询）
+#### Threshold Query
 
 ```circom
-// 输入: 私有数据 [25, 45, 60, 18, 72, 38, 55]
-//       阈值 = 50 (公开)
-// 输出: count = 3 (公开，表示 3 个数据 > 50)
-//       承诺 = hash(data) (公开)
-// 优势: 只知道数量，不知道具体是哪些数据
+// Input: private data [25, 45, 60, 18, 72, 38, 55]
+//        threshold = 50 (public)
+// Output: count = 3 (public, indicating 3 data points > 50)
+//         commitment = hash(data) (public)
+// Advantage: Only know the count, not which specific data points
 ```
 
-### 4. 链上验证
+### 4. On-Chain Verification
 
 ```move
 // zkp_verifier.move
@@ -574,97 +609,97 @@ public entry fun verify_proof(
     clock: &Clock,
     ctx: &mut TxContext
 ) {
-    // 使用 Sui 原生 Groth16 验证器
+    // Use Sui native Groth16 verifier
     let is_valid = groth16::verify_groth16_proof(&curve, &pvk, &inputs, &points);
     
     if (is_valid) {
         result.verified = true;
-        // 触发 ProofVerified 事件
+        // Trigger ProofVerified event
     }
 }
 ```
 
 ---
 
-## 🔒 安全特性
+## 🔒 Security Features
 
-### 多层加密架构
+### Multi-Layer Encryption Architecture
 
-1. **存储层加密**: AES-256-GCM 加密 Blob（256-bit 随机密钥）
-2. **密钥交换加密**: X25519 ECDH 非对称加密分发对称密钥
-3. **零知识证明**: Groth16 保证计算正确性，无需暴露原始数据
+1. **Storage Layer Encryption**: AES-256-GCM encrypted Blob (256-bit random key)
+2. **Key Exchange Encryption**: X25519 ECDH asymmetric encryption for symmetric key distribution
+3. **Zero-Knowledge Proofs**: Groth16 ensures computational correctness without exposing raw data
 
-### 访问控制
+### Access Control
 
-- ✅ 数据所有者：完全访问权限
-- ✅ 已购买用户：通过 `has_purchased` 验证
-- ✅ 授权用户：通过 `AccessGrant` 验证
-- ❌ 未授权用户：无法访问加密数据
+- ✅ Data Owner: Full access permissions
+- ✅ Purchased Users: Verified via `has_purchased`
+- ✅ Authorized Users: Verified via `AccessGrant`
+- ❌ Unauthorized Users: Cannot access encrypted data
 
-### 防作弊机制
+### Anti-Cheating Mechanisms
 
-- **链上验证**: 所有 ZKP 证明必须通过 Groth16 验证
-- **数据承诺**: Poseidon 哈希确保数据完整性
-- **双重检查**: 前端生成证明 + 链上验证，防止虚假证明
+- **On-Chain Verification**: All ZKP proofs must pass Groth16 verification
+- **Data Commitment**: Poseidon hash ensures data integrity
+- **Double Check**: Frontend proof generation + on-chain verification prevents false proofs
 
 ---
 
-## 🆚 与现有方案的深度对比
+## 🆚 Deep Comparison with Existing Solutions
 
-### 技术维度对比
+### Technical Dimensions Comparison
 
-| **维度** | **传统云计算 (AWS/Azure)** | **区块链数据市场 (Ocean)** | **MPC方案 (Enigma)** | **HydraProtocol** |
+| **Dimension** | **Traditional Cloud (AWS/Azure)** | **Blockchain Data Markets (Ocean)** | **MPC Solutions (Enigma)** | **HydraProtocol** |
 |---------|---------------------------|--------------------------|---------------------|-------------------|
-| **数据存储** | 中心化服务器 | IPFS (中心化网关) | 链上/IPFS | **Walrus (完全去中心化)** |
-| **数据加密** | TLS传输层加密 | 可选加密 | 秘密共享 | **AES-256-GCM + X25519** |
-| **隐私计算** | TEE (SGX/SEV) | ❌ 不支持 | MPC (需3+节点在线) | **ZKP (单方即可)** |
-| **计算验证** | 信任服务商 | ❌ 无验证 | 部分验证 | **链上 Groth16 验证** |
-| **密钥管理** | HSM硬件模块 | 中心化托管 | 秘密共享 (t-of-n) | **ECDH 端到端加密** |
-| **抗审查性** | ❌ 可被关停 | 部分抗审查 | 依赖节点网络 | **✅ 永久存储** |
-| **Gas成本** | $0 (中心化) | 高 (以太坊 ~$50/tx) | 中等 | **极低 (~$0.02/tx)** |
+| **Data Storage** | Centralized servers | IPFS (centralized gateway) | On-chain/IPFS | **Walrus (fully decentralized)** |
+| **Data Encryption** | TLS transport encryption | Optional encryption | Secret sharing | **AES-256-GCM + X25519** |
+| **Privacy Computing** | TEE (SGX/SEV) | ❌ Not supported | MPC (requires 3+ nodes online) | **ZKP (single party)** |
+| **Computation Verification** | Trust service provider | ❌ No verification | Partial verification | **On-chain Groth16 verification** |
+| **Key Management** | HSM hardware modules | Centralized custody | Secret sharing (t-of-n) | **ECDH end-to-end encryption** |
+| **Censorship Resistance** | ❌ Can be shut down | Partial resistance | Depends on node network | **✅ Permanent storage** |
+| **Gas Cost** | $0 (centralized) | High (Ethereum ~$50/tx) | Medium | **Extremely low (~$0.02/tx)** |
 | **TPS** | >100K | <20 | <100 | **>10K (Sui)** |
-| **可扩展性** | ✅ 高 | ❌ 差 | ❌ 差 | **✅ 高 (Sui并发)** |
+| **Scalability** | ✅ High | ❌ Poor | ❌ Poor | **✅ High (Sui concurrency)** |
 
-### 安全性对比
+### Security Comparison
 
-| **攻击向量** | **传统方案** | **Ocean Protocol** | **HydraProtocol** |
+| **Attack Vector** | **Traditional Solutions** | **Ocean Protocol** | **HydraProtocol** |
 |------------|-------------|-------------------|-------------------|
-| **数据泄露** | ⚠️ 服务器入侵 → 全部泄露 | ⚠️ IPFS网关泄露 | ✅ 端到端加密，无法泄露 |
-| **中间人攻击** | ⚠️ TLS降级攻击 | ⚠️ 网关篡改 | ✅ 密钥链上加密分发 |
-| **数据篡改** | ⚠️ 数据库被修改 | ✅ 区块链不可篡改 | ✅ Walrus + 区块链双重保障 |
-| **恶意计算** | ⚠️ 服务器返回虚假结果 | ❌ 无验证机制 | ✅ ZKP 密码学证明 |
-| **密钥泄露** | ⚠️ HSM被攻破 → 全部泄露 | ⚠️ 中心化密钥服务器 | ✅ 每个买家独立密钥 |
-| **Sybil攻击** | N/A | ⚠️ 刷单评分 | ✅ 质押机制防护 |
-| **DDoS攻击** | ⚠️ 单点故障 | ⚠️ IPFS网关 | ✅ Walrus分布式网络 |
+| **Data Breach** | ⚠️ Server intrusion → Full leak | ⚠️ IPFS gateway leak | ✅ End-to-end encryption, cannot leak |
+| **Man-in-the-Middle** | ⚠️ TLS downgrade attack | ⚠️ Gateway tampering | ✅ Keys encrypted on-chain distribution |
+| **Data Tampering** | ⚠️ Database modification | ✅ Blockchain immutable | ✅ Walrus + Blockchain dual protection |
+| **Malicious Computation** | ⚠️ Server returns false results | ❌ No verification mechanism | ✅ ZKP cryptographic proof |
+| **Key Leakage** | ⚠️ HSM compromised → Full leak | ⚠️ Centralized key server | ✅ Independent key per buyer |
+| **Sybil Attack** | N/A | ⚠️ Fake ratings | ✅ Staking mechanism protection |
+| **DDoS Attack** | ⚠️ Single point of failure | ⚠️ IPFS gateway | ✅ Walrus distributed network |
 
-### 用户体验对比
+### User Experience Comparison
 
-| **功能** | **Ocean Protocol** | **HydraProtocol** |
+| **Feature** | **Ocean Protocol** | **HydraProtocol** |
 |---------|-------------------|-------------------|
-| **数据上传** | 需手动指定元数据 | ✅ 自动识别列 + 类型推断 |
-| **数据预览** | ❌ 不支持 | ✅ 加密状态下统计预览 |
-| **密钥分发** | 手动联系卖家 | ✅ 自动分发 (useAutoDistributeKeys) |
-| **计算类型** | ❌ 仅数据下载 | ✅ Average + Threshold + 可扩展 |
-| **结果验证** | 信任买家 | ✅ 链上 ZKP 验证，任何人可审计 |
-| **多数据集计算** | ❌ 不支持 | ✅ 支持多个 DataRecord 联合计算 |
-| **移动端支持** | 部分支持 | ✅ 响应式设计，移动端友好 |
+| **Data Upload** | Manual metadata specification | ✅ Auto-recognize columns + type inference |
+| **Data Preview** | ❌ Not supported | ✅ Statistical preview in encrypted state |
+| **Key Distribution** | Manual contact seller | ✅ Auto-distribution (useAutoDistributeKeys) |
+| **Computation Types** | ❌ Data download only | ✅ Average + Threshold + Extensible |
+| **Result Verification** | Trust buyer | ✅ On-chain ZKP verification, anyone can audit |
+| **Multi-Dataset Computation** | ❌ Not supported | ✅ Support joint computation of multiple DataRecords |
+| **Mobile Support** | Partial support | ✅ Responsive design, mobile-friendly |
 
 ---
 
-## ⚙️ 关键技术实现细节
+## ⚙️ Key Technical Implementation Details
 
-### 1. Circom 电路设计
+### 1. Circom Circuit Design
 
-#### Average 电路的数学原理
+#### Mathematical Principles of Average Circuit
 
 ```circom
-// average.circom 关键约束
+// average.circom key constraints
 template Average(n) {
     signal input data[n];
     signal output avg;
     signal output commitment;
 
-    // 约束1: 计算总和
+    // Constraint 1: Calculate sum
     var sum = 0;
     for (var i = 0; i < n; i++) {
         sum = sum + data[i];
@@ -672,47 +707,47 @@ template Average(n) {
     signal tempSum;
     tempSum <== sum;
 
-    // 约束2: 整数除法验证
-    // 保证 avg 是正确的: sum - avg*n < n
+    // Constraint 2: Integer division verification
+    // Ensure avg is correct: sum - avg*n < n
     component lt = LessThan(64);
     lt.in[0] <== tempSum - avg * n;
     lt.in[1] <== n;
-    lt.out === 1;  // 必须为真
+    lt.out === 1;  // Must be true
 
-    // 约束3: 数据承诺 (Poseidon哈希)
+    // Constraint 3: Data commitment (Poseidon hash)
     component hasher = Poseidon(n);
     for (var i = 0; i < n; i++) {
         hasher.inputs[i] <== data[i];
     }
     commitment <== hasher.out;
 
-    // 约束4: 范围检查 (防止负数/溢出)
+    // Constraint 4: Range check (prevent negative/overflow)
     component rangeChecks[n];
     for (var i = 0; i < n; i++) {
         rangeChecks[i] = Num2Bits(32);
-        rangeChecks[i].in <== data[i];  // 确保每个数据 <= 2^32
+        rangeChecks[i].in <== data[i];  // Ensure each data <= 2^32
     }
 }
 ```
 
-**为什么这样设计是安全的？**
-1. **零知识性**: `data[n]` 是私有输入，永不公开
-2. **完整性**: `commitment` 绑定了原始数据，无法替换
-3. **正确性**: 约束确保 `avg` 确实是 `sum / n` 的整数除法结果
-4. **可验证性**: Groth16 证明可在链上快速验证 (<1ms)
+**Why is this design secure?**
+1. **Zero-Knowledge**: `data[n]` is private input, never revealed
+2. **Completeness**: `commitment` binds original data, cannot be replaced
+3. **Soundness**: Constraints ensure `avg` is indeed the integer division result of `sum / n`
+4. **Verifiability**: Groth16 proof can be quickly verified on-chain (<1ms)
 
-#### Threshold Query 的比较电路
+#### Comparison Circuit of Threshold Query
 
 ```circom
-// threshold.circom 核心逻辑
+// threshold.circom core logic
 template ThresholdQuery(n) {
     signal input data[n];
-    signal input threshold;  // 公开输入
-    signal input salt;       // 随机盐值
+    signal input threshold;  // public input
+    signal input salt;       // random salt
     signal output count;
     signal output commitment;
 
-    // 对每个数据点进行比较
+    // Compare each data point
     component comparators[n];
     signal isAboveThreshold[n];
 
@@ -725,14 +760,14 @@ template ThresholdQuery(n) {
         isAboveThreshold[i] <== comparators[i].out;
     }
 
-    // 累加计数
+    // Accumulate count
     var totalCount = 0;
     for (var i = 0; i < n; i++) {
         totalCount = totalCount + isAboveThreshold[i];
     }
     count <== totalCount;
 
-    // 承诺包含原始数据和盐值
+    // Commitment includes original data and salt
     component hasher = Poseidon(n + 1);
     for (var i = 0; i < n; i++) {
         hasher.inputs[i] <== data[i];
@@ -742,41 +777,41 @@ template ThresholdQuery(n) {
 }
 ```
 
-**Threshold Query 的应用场景**：
+**Threshold Query Application Scenarios**:
 ```
-医疗场景: 统计"血糖 > 7.0 mmol/L"的患者比例
-  → 不泄露任何患者的具体血糖值
+Medical Scenario: Count proportion of patients with "blood sugar > 7.0 mmol/L"
+  → Does not reveal any patient's specific blood sugar value
   
-金融场景: 统计"贷款违约率 > 5%"的客户数量
-  → 不泄露任何客户的违约情况
+Financial Scenario: Count number of customers with "loan default rate > 5%"
+  → Does not reveal any customer's default status
   
-供应链: 统计"库存 < 安全线"的SKU数量
-  → 不泄露具体库存数量
+Supply Chain: Count number of SKUs with "inventory < safety line"
+  → Does not reveal specific inventory quantities
 ```
 
-### 2. Sui Move 智能合约架构
+### 2. Sui Move Smart Contract Architecture
 
-#### DataRegistry 的访问控制模型
+#### Access Control Model of DataRegistry
 
 ```move
-// data_registry.move 关键设计
+// data_registry.move key design
 public struct DataRecord has key, store {
     id: UID,
     owner: address,
     walrus_blob_id: String,
     encrypted: bool,
-    // 核心: 为每个买家存储独立的加密密钥
+    // Core: Store independent encrypted key for each buyer
     encryption_keys: Table<address, vector<u8>>,
-    // 授权列表: 支持细粒度权限控制
+    // Authorization list: Support fine-grained permission control
     access_grants: Table<address, ID>,
     is_public: bool,
     ...
 }
 
-// 三层访问控制:
-// 1. Owner: 完全控制权
+// Three-tier access control:
+// 1. Owner: Full control
 // 2. Purchaser: has_encrypted_key_for() = true
-// 3. Grantee: has_access_grant() = true (手动授权)
+// 3. Grantee: has_access_grant() = true (manual authorization)
 
 public fun has_encrypted_key_for(
     data_record: &DataRecord, 
@@ -786,51 +821,51 @@ public fun has_encrypted_key_for(
 }
 ```
 
-**为什么这样设计？**
-- ✅ **隐私**: 每个买家的密钥独立加密，互不可见
-- ✅ **灵活**: 支持密钥撤销 (remove from encryption_keys)
-- ✅ **可扩展**: 支持批量授权、时间限制等高级功能
+**Why this design?**
+- ✅ **Privacy**: Each buyer's key is independently encrypted, not visible to each other
+- ✅ **Flexibility**: Support key revocation (remove from encryption_keys)
+- ✅ **Extensibility**: Support batch authorization, time limits, and other advanced features
 
-#### Market 的费用分配机制
+#### Fee Distribution Mechanism of Market
 
 ```move
-// market.move 关键代码
+// market.move key code
 public entry fun purchase_data_access(...) {
-    let price = listing.price;  // 例如: 10 SUI
+    let price = listing.price;  // Example: 10 SUI
     
-    // 费用分配 (basis points: 10000 = 100%)
+    // Fee distribution (basis points: 10000 = 100%)
     let platform_fee = (price * 250) / 10000;    // 2.5% = 0.25 SUI
     let verifier_reward = (price * 500) / 10000; // 5% = 0.5 SUI
     let owner_revenue = price - platform_fee - verifier_reward; // 92.5% = 9.25 SUI
     
-    // 原子性操作: 要么全部成功,要么全部回滚
+    // Atomic operation: Either all succeed or all rollback
     let mut payment_balance = coin::into_balance(payment);
     
-    // 平台费 → marketplace.platform_balance
+    // Platform fee → marketplace.platform_balance
     let platform_coin = balance::split(&mut payment_balance, platform_fee);
     balance::join(&mut marketplace.platform_balance, platform_coin);
     
-    // 验证者奖励 → marketplace.reward_pool
+    // Verifier reward → marketplace.reward_pool
     let reward_coin = balance::split(&mut payment_balance, verifier_reward);
     balance::join(&mut marketplace.reward_pool, reward_coin);
     
-    // 剩余金额 → 数据所有者
+    // Remaining amount → data owner
     let owner_coin = coin::from_balance(payment_balance, ctx);
     transfer::public_transfer(owner_coin, listing.owner);
     
-    // 记录购买凭证
+    // Record purchase certificate
     table::add(&mut listing.purchasers, sender, true);
 }
 ```
 
-**设计优势**：
-- ✅ **原子性**: 使用 Sui 的事务特性,保证要么全部成功
-- ✅ **透明**: 费率写死在合约,任何人可审计
-- ✅ **可升级**: DAO 治理可调整费率参数
+**Design Advantages**:
+- ✅ **Atomicity**: Use Sui's transaction features, guarantee either all succeed
+- ✅ **Transparency**: Fee rates hardcoded in contract, anyone can audit
+- ✅ **Upgradeable**: DAO governance can adjust fee parameters
 
-### 3. 前端 ZKP 集成 (SnarkJS)
+### 3. Frontend ZKP Integration (SnarkJS)
 
-#### 浏览器端证明生成流程
+#### Browser-Side Proof Generation Process
 
 ```typescript
 // frontend/src/utils/zkp-browser.ts
@@ -839,37 +874,37 @@ export async function generateProof(
   input: number[],
   threshold?: number
 ): Promise<ProofResult> {
-  // 1. 准备电路输入
+  // 1. Prepare circuit input
   const circuitInput: Record<string, any> = {};
   
   if (circuitType === 'average') {
-    circuitInput.data = input.slice(0, 3);  // Average 电路固定 n=3
+    circuitInput.data = input.slice(0, 3);  // Average circuit fixed n=3
   } else if (circuitType === 'threshold') {
-    circuitInput.data = input.slice(0, 10);  // Threshold 电路固定 n=10
+    circuitInput.data = input.slice(0, 10);  // Threshold circuit fixed n=10
     circuitInput.threshold = threshold || 50;
-    circuitInput.salt = Math.floor(Math.random() * 1000000);  // 随机盐值
+    circuitInput.salt = Math.floor(Math.random() * 1000000);  // Random salt
   }
 
-  // 2. 生成 Witness (计算电路的所有中间信号)
+  // 2. Generate Witness (calculate all intermediate signals of circuit)
   const wasmPath = `/circuits/${circuitType}/${circuitType}.wasm`;
   const { witness } = await snarkjs.wtns.calculate(
     circuitInput, 
     wasmPath
   );
 
-  // 3. 生成 Groth16 证明 (耗时操作: 10-30秒)
+  // 3. Generate Groth16 proof (time-consuming operation: 10-30 seconds)
   const zkeyPath = `/circuits/${circuitType}/circuit_final.zkey`;
   const { proof, publicSignals } = await snarkjs.groth16.prove(
     zkeyPath, 
     witness
   );
 
-  // 4. 序列化证明为字节数组 (用于链上验证)
+  // 4. Serialize proof as byte array (for on-chain verification)
   const proofBytes = new Uint8Array([
     ...hexToBytes(proof.pi_a[0]),  // 96 bytes
-    ...hexToBytes(proof.pi_b[0]),  // 96 bytes (压缩后)
+    ...hexToBytes(proof.pi_b[0]),  // 96 bytes (compressed)
     ...hexToBytes(proof.pi_c[0]),  // 96 bytes
-  ]); // 总计 192 bytes
+  ]); // Total 192 bytes
 
   const publicInputsBytes = publicSignals.map(s => 
     BigInt(s).toString()
@@ -879,30 +914,30 @@ export async function generateProof(
 }
 ```
 
-**性能优化技巧**：
-1. **预加载电路**: 在页面加载时预取 `.wasm` 和 `.zkey` 文件
-2. **Web Workers**: 在后台线程生成证明,不阻塞 UI
-3. **缓存**: 使用 Service Worker 缓存电路文件 (减少网络延迟)
-4. **渐进式体验**: 显示进度条 (0% → 50% → 100%)
+**Performance Optimization Tricks**:
+1. **Preload Circuits**: Prefetch `.wasm` and `.zkey` files on page load
+2. **Web Workers**: Generate proofs in background thread, don't block UI
+3. **Caching**: Use Service Worker to cache circuit files (reduce network latency)
+4. **Progressive Experience**: Display progress bar (0% → 50% → 100%)
 
-### 4. X25519 密钥分发实现
+### 4. X25519 Key Distribution Implementation
 
-#### 前端密钥交换代码
+#### Frontend Key Exchange Code
 
 ```typescript
 // frontend/src/hooks/useAutoDistributeKeys.ts
 async function distributeKeyToBuyer(buyer: address, aesKey: string) {
-  // 1. 从链上读取买家的 X25519 公钥
+  // 1. Read buyer's X25519 public key from chain
   const buyerPubKey = await suiClient.call('data_registry::get_user_pubkey', [
     CONTRACT_ADDRESSES.dataRegistryId,
     buyer
   ]);
 
-  // 2. 生成共享密钥 (ECDH)
-  const sellerPrivKey = nacl.box.keyPair().secretKey;  // 卖家的临时私钥
+  // 2. Generate shared key (ECDH)
+  const sellerPrivKey = nacl.box.keyPair().secretKey;  // Seller's temporary private key
   const sharedSecret = nacl.scalarMult(sellerPrivKey, buyerPubKey);
 
-  // 3. 使用共享密钥加密 AES 密钥
+  // 3. Encrypt AES key using shared key
   const nonce = nacl.randomBytes(24);
   const encryptedKey = nacl.secretbox(
     Buffer.from(aesKey, 'base64'),
@@ -910,7 +945,7 @@ async function distributeKeyToBuyer(buyer: address, aesKey: string) {
     sharedSecret
   );
 
-  // 4. 调用链上函数分发密钥
+  // 4. Call on-chain function to distribute key
   const tx = new Transaction();
   tx.moveCall({
     target: `${packageId}::market::distribute_key_to_buyer`,
@@ -926,61 +961,87 @@ async function distributeKeyToBuyer(buyer: address, aesKey: string) {
 }
 ```
 
-**安全性分析**：
-- ✅ **前向保密**: 即使卖家私钥泄露,过去的密钥交换仍安全
-- ✅ **不可否认**: 链上事件记录了密钥分发时间和内容哈希
-- ✅ **防重放**: 每次密钥交换使用不同的 nonce
+**Security Analysis**:
+- ✅ **Forward Secrecy**: Even if seller's private key is compromised, past key exchanges remain secure
+- ✅ **Non-Repudiation**: On-chain events record key distribution time and content hash
+- ✅ **Replay Protection**: Each key exchange uses different nonce
 
 ---
 
-## 📊 系统指标
+## 📊 System Metrics
 
-| 指标                | 性能                              |
+| Metric                | Performance                       |
 |---------------------|-----------------------------------|
-| ZKP 生成时间        | 10-30 秒 (浏览器端)               |
-| 链上验证时间        | < 1 毫秒                          |
-| Sui 交易确认        | ~0.5 秒                           |
-| Walrus 上传速度     | ~5 MB/s (取决于网络)              |
-| Gas 费用            | ~0.02-0.05 SUI/交易               |
-| 支持数据大小        | 最大 100 MB (合约限制可调整)       |
+| ZKP Generation Time | 10-30 seconds (browser-side)      |
+| On-Chain Verification | < 1 millisecond                  |
+| Sui Transaction Confirmation | ~0.5 seconds                |
+| Walrus Upload Speed | ~5 MB/s (depends on network)      |
+| Gas Cost            | ~0.02-0.05 SUI/transaction        |
+| Supported Data Size | Max 100 MB (contract limit adjustable) |
 
 ---
 
-## 🛣️ 路线图
+## 🛣️ Roadmap
 
-### ✅ Phase 1 - MVP (已完成)
-- [x] 基础数据上传与存储
-- [x] ZKP 电路（Average, Threshold）
-- [x] 数据市场与购买
-- [x] 安全密钥分发
+### ✅ Phase 1 - MVP (Completed)
+- [x] Basic data upload & storage
+- [x] ZKP circuits (Average, Threshold)
+- [x] Data marketplace & purchasing
+- [x] Secure key distribution
 
-### 🔄 Phase 2 - 增强功能 (进行中)
-- [ ] 更多 ZKP 电路（方差、中位数、回归分析）
-- [ ] 数据质量评分系统
-- [ ] DAO 治理模块
-- [ ] 跨链桥接
+### 🔄 Phase 2 - Enhanced Features (In Progress)
+- [ ] More ZKP circuits (variance, median, regression analysis)
+- [ ] Data quality rating system
+- [ ] DAO governance module
+- [ ] Cross-chain bridging
 
-### 🚀 Phase 3 - 规模化
-- [ ] TEE/FHE 集成（混合隐私计算）
-- [ ] 去中心化计算节点网络
-- [ ] 企业级 SDK 和 API
-- [ ] 监管合规工具
+### 🚀 Phase 3 - Scaling
+- [ ] TEE/FHE integration (hybrid privacy computing)
+- [ ] Decentralized compute node network
+- [ ] Enterprise-grade SDK and API
+- [ ] Regulatory compliance tools
 
 ---
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-欢迎社区贡献！请遵循以下步骤：
+Community contributions are welcome! Please follow these steps:
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+1. Fork this repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🏆 Acknowledgments
+
+Built for the Walrus Haulout Hackathon with ❤️
+
+Special thanks to:
+- Sui Foundation for the powerful blockchain infrastructure
+- Walrus team for decentralized storage innovation
+- Circom community for ZKP circuit development tools
+- All contributors and community members
+
+---
+
+## 📞 Contact
+
+- Website: [https://hydraprotocol.io](https://hydraprotocol.io)
+- Twitter: [@HydraProtocol](https://twitter.com/HydraProtocol)
+- Discord: [Join our community](https://discord.gg/hydraprotocol)
+- Email: contact@hydraprotocol.io
 
 ---
 
 <div align="center">
   <sub>Built with ❤️ for Walrus Haulout Hackathon</sub>
 </div>
-
