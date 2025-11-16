@@ -1,0 +1,38 @@
+{
+  "name": "@hydra/sdk",
+  "version": "1.0.0",
+  "description": "HydraProtocol TypeScript SDK for Walrus storage and ZKP computation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "demo": "ts-node src/examples/medical-demo.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "walrus",
+    "zkp",
+    "sui",
+    "privacy",
+    "data-marketplace"
+  ],
+  "author": "HydraProtocol Team",
+  "license": "MIT",
+  "dependencies": {
+    "@mysten/sui.js": "^0.54.1",
+    "@noble/curves": "^1.2.0",
+    "@noble/hashes": "^1.3.2",
+    "axios": "^1.6.0",
+    "snarkjs": "^0.7.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}

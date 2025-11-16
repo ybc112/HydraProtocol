@@ -1,0 +1,93 @@
+# Node modules (必须排除，文件太多)
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编译产物
+dist/
+build/
+*.log
+.next/
+out/
+
+# 环境变量文件 (包含敏感信息)
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 电路编译产物 (可选，这些文件可能很大)
+circuits/build/**/*.cpp
+circuits/build/**/*.dat
+circuits/build/**/*.o
+circuits/build/**/*.exe
+circuits/node_modules/
+circuits/npm-debug.log
+
+# 前端编译缓存
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+frontend/.turbo/
+
+# 脚本依赖
+scripts/node_modules/
+
+# SDK 编译产物
+sdk/typescript/dist/
+sdk/typescript/node_modules/
+
+# 私钥文件 (非常重要，绝不能上传!)
+**/private_key.txt
+**/*.pem
+**/*.key
+suiprivkey*
+**/*.priv
+**/wallet.json
+
+# Sui 配置
+.sui/
+**/.sui/
+
+# 临时文件
+*.tmp
+.cache/
+.temp/
+*.swp
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 锁文件 (可选，根据团队协作需求决定)
+# package-lock.json
+# yarn.lock
+
+# 合约编译缓存
+contracts/build/
+contracts/.aptos/
+
+# 大文件 (如果电路文件太大，可以排除)
+# circuits/build/**/pot*.ptau
+# circuits/build/**/*.zkey
+
+# 日志文件
+*.log
+logs/
+*.log.*
+

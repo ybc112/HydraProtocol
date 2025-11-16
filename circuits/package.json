@@ -1,0 +1,15 @@
+{
+  "name": "circuits",
+  "version": "1.0.0",
+  "description": "本目录包含 HydraProtocol 的零知识证明电路实现。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "circomlib": "^2.0.5"
+  }
+}

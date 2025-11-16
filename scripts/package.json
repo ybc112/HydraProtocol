@@ -1,0 +1,12 @@
+{
+  "name": "hydra-protocol-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "register-circuits": "tsx register-circuits.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.44.0",
+    "tsx": "^4.7.0"
+  }
+}

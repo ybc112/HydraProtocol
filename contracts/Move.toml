@@ -1,0 +1,16 @@
+[package]
+name = "HydraProtocol"
+version = "0.1.0"
+edition = "2024.beta"
+authors = ["HydraProtocol Team"]
+license = "MIT"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "mainnet" }
+
+[addresses]
+hydra = "0x0"
+
+[dev-dependencies]
+
+

@@ -1,0 +1,13 @@
+[
+  { "id": 1, "name": "患者A", "age": 45, "gender": "男", "recoveryDays": 12 },
+  { "id": 2, "name": "患者B", "age": 67, "gender": "女", "recoveryDays": 18 },
+  { "id": 3, "name": "患者C", "age": 52, "gender": "男", "recoveryDays": 15 },
+  { "id": 4, "name": "患者D", "age": 71, "gender": "女", "recoveryDays": 22 },
+  { "id": 5, "name": "患者E", "age": 38, "gender": "男", "recoveryDays": 9 },
+  { "id": 6, "name": "患者F", "age": 55, "gender": "女", "recoveryDays": 14 },
+  { "id": 7, "name": "患者G", "age": 63, "gender": "男", "recoveryDays": 19 },
+  { "id": 8, "name": "患者H", "age": 49, "gender": "女", "recoveryDays": 11 },
+  { "id": 9, "name": "患者I", "age": 58, "gender": "男", "recoveryDays": 16 },
+  { "id": 10, "name": "患者J", "age": 42, "gender": "女", "recoveryDays": 13 }
+]
+
