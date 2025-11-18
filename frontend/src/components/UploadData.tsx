@@ -201,13 +201,25 @@ export function UploadData() {
               </label>
               <div className="border-2 border-dashed border-slate-700 rounded-lg p-6 hover:border-emerald-500/50 transition-colors">
                 <input
+                  id="file-upload"
                   type="file"
                   onChange={handleFileChange}
                   disabled={isUploading}
                   accept=".csv,.json,.xlsx,.xls,.txt"
-                  className="w-full p-3 bg-slate-900 text-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-500 file:text-white hover:file:bg-emerald-600"
+                  className="hidden"
                   required
                 />
+                <label
+                  htmlFor="file-upload"
+                  className="flex items-center justify-center w-full cursor-pointer"
+                >
+                  <span className="inline-flex items-center px-6 py-3 bg-emerald-500 text-white font-semibold rounded-full hover:bg-emerald-600 transition-colors">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Choose File
+                  </span>
+                </label>
                 {file ? (
                   <div className="mt-3 p-3 bg-emerald-900/20 border border-emerald-500/30 rounded-lg">
                     <p className="text-sm text-emerald-400 font-medium">
@@ -219,7 +231,7 @@ export function UploadData() {
                   </div>
                 ) : (
                   <p className="mt-3 text-sm text-gray-500 text-center">
-                    Supported: CSV, JSON, Excel, TXT (max 10MB)
+                    No file selected · Supported: CSV, JSON, Excel, TXT (max 10MB)
                   </p>
                 )}
               </div>

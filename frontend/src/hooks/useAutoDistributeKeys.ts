@@ -5,6 +5,7 @@ import { SuiClient } from '@mysten/sui/client';
 import { Transaction } from '@mysten/sui/transactions';
 import { getHydraConfig, CONTRACT_ADDRESSES } from '../config/hydra';
 import { x25519 } from '@noble/curves/ed25519';
+import { readSymmetricKey, saveSymmetricKey } from '../utils/secure-store';
 
 export function useAutoDistributeKeys(enabled: boolean) {
   const wallet = useWallet();
@@ -64,9 +65,35 @@ export function useAutoDistributeKeys(enabled: boolean) {
             const rfields = recordObj.data.content.fields as any;
             const blobId = rfields.walrus_blob_id as string;
 
-            const keyB64 = typeof window !== 'undefined' ? localStorage.getItem(`hydra:blobKey:${blobId}`) : null;
-            if (!keyB64) { setLastError(`missing local key for ${blobId}`); continue; }
-            const symKey = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
+            let symKey: Uint8Array | null = null;
+
+            // 优先从安全存储读取对称密钥
+            try {
+              symKey = await readSymmetricKey(blobId);
+            } catch (e) {
+              setLastError(e instanceof Error ? e.message : 'failed to read local symmetric key');
+              continue;
+            }
+
+            // 兼容旧版本：从 localStorage 读取并尝试迁移到安全存储
+            if (!symKey) {
+              const legacyB64 = typeof window !== 'undefined'
+                ? localStorage.getItem(`hydra:blobKey:${blobId}`) || undefined
+                : undefined;
+              if (legacyB64) {
+                const legacyBytes = Uint8Array.from(atob(legacyB64), c => c.charCodeAt(0));
+                symKey = legacyBytes;
+                try {
+                  await saveSymmetricKey(blobId, legacyBytes);
+                  localStorage.removeItem(`hydra:blobKey:${blobId}`);
+                  console.log(`✅ Migrated symmetric key for blob ${blobId} to secure store`);
+                } catch (e) {
+                  console.warn('Failed to migrate symmetric key to secure store:', e);
+                }
+              }
+            }
+
+            if (!symKey) { setLastError(`missing local key for ${blobId}`); continue; }
 
             // Find buyer pubkey
             const ukEvents = await client.queryEvents({ query: { MoveEventType: `${CONTRACT_ADDRESSES.packageId}::data_registry::UserKeyRegistered` }, limit: 200, order: 'descending' });

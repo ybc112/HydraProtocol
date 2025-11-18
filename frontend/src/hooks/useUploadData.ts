@@ -10,6 +10,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import { SuiClient } from '@mysten/sui/client';
 import { getHydraConfig, CONTRACT_ADDRESSES } from '../config/hydra';
 import { uploadToWalrus, calculateFileHash } from '../utils/walrus';
+import { saveSymmetricKey } from '../utils/secure-store';
 
 export interface UploadDataParams {
   file: File;
@@ -199,13 +200,12 @@ export function useUploadData(): UseUploadDataReturn {
 
       const listingId = listing && 'objectId' in listing ? (listing as any).objectId : undefined;
 
-      // Store encryption key in localStorage（用于后续分发给买家，链上不存明文）
+      // Store encryption key in secure IndexedDB (用于后续分发给买家，链上不存明文)
       try {
         const exportedKey = await crypto.subtle.exportKey('raw', cryptoKey);
-        const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
-        localStorage.setItem(`hydra:blobKey:${walrusResult.blobId}`, keyBase64);
+        await saveSymmetricKey(walrusResult.blobId, new Uint8Array(exportedKey));
       } catch (e) {
-        console.warn('Failed to store encryption key in localStorage:', e);
+        console.warn('Failed to store encryption key securely:', e);
       }
 
       setUploadProgress(100);

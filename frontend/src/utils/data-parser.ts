@@ -10,10 +10,15 @@ import { downloadFromWalrus } from './walrus';
 import { SuiClient } from '@mysten/sui/client';
 import { getHydraConfig, CONTRACT_ADDRESSES } from '../config/hydra';
 import { x25519 } from '@noble/curves/ed25519';
+import { readPrivateKey, readSymmetricKey, saveSymmetricKey } from './secure-store';
 
 /**
  * 从多个来源获取加密密钥
- * 优先级：1. localStorage (自己的数据)  2. 传入的密钥 (购买的数据)
+ * 优先级：
+ *   1. 传入的明文对称密钥 (Base64)
+ *   2. 本地安全存储（IndexedDB 中加密存储的对称密钥）
+ *   3. 旧版 localStorage（自动迁移到安全存储）
+ *   4. 链上 KeyDistributed 事件（买家场景，通过买家私钥解包）
  */
 async function getEncryptionKey(
   blobId: string,
@@ -22,14 +27,68 @@ async function getEncryptionKey(
 ): Promise<CryptoKey | null> {
   try {
     let keyB64 = keyBase64;
-    
-    // 首先尝试从 localStorage 获取（自己上传的数据）
-    if (!keyB64) {
-      keyB64 = localStorage.getItem(`hydra:blobKey:${blobId}`) || undefined;
+    // Prefer secure local symmetric key (uploader scenario)
+    const localSym = await readSymmetricKey(blobId);
+    if (localSym) {
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        localSym,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+      return cryptoKey;
     }
-    
+
+    // 1. 如果调用方显式传入了密钥（例如从外部安全通道获取），直接使用
+    if (keyB64) {
+      const keyBytes = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyBytes,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+      return cryptoKey;
+    }
+
+    // 2. 优先从安全存储读取（自己上传的数据，对称密钥经过密码加密后存放在 IndexedDB）
+    try {
+      const symFromSecure = await readSymmetricKey(blobId);
+      if (symFromSecure) {
+        const cryptoKey = await crypto.subtle.importKey(
+          'raw',
+          symFromSecure,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['decrypt']
+        );
+        return cryptoKey;
+      }
+    } catch (e) {
+      console.warn('Failed to read symmetric key from secure store:', e);
+    }
+
+    // 3. 兼容旧版本：从 localStorage 读取明文 Base64，对称密钥，并尝试迁移到安全存储
+    const legacyB64 = typeof window !== 'undefined'
+      ? localStorage.getItem(`hydra:blobKey:${blobId}`) || undefined
+      : undefined;
+    if (legacyB64) {
+      keyB64 = legacyB64;
+      // 自动迁移到安全存储（最佳努力）
+      try {
+        const legacyBytes = Uint8Array.from(atob(legacyB64), c => c.charCodeAt(0));
+        await saveSymmetricKey(blobId, legacyBytes);
+        localStorage.removeItem(`hydra:blobKey:${blobId}`);
+        console.log(`✅ Migrated symmetric key for blob ${blobId} to secure store`);
+      } catch (e) {
+        console.warn('Failed to migrate symmetric key to secure store:', e);
+      }
+    }
+
     if (!keyB64) {
-      // 尝试从链上事件检索加密的密钥并解包（买家场景）
+      // 4. 尝试从链上事件检索加密的密钥并解包（买家场景）
       if (opts?.dataRecordId && opts?.buyerAddress) {
         const config = getHydraConfig();
         const client = new SuiClient({
@@ -60,12 +119,8 @@ async function getEncryptionKey(
               const iv = payload.slice(32, 44);
               const cipher = payload.slice(44);
 
-              const privB64 = localStorage.getItem(`hydra:encPrivKey:${opts.buyerAddress}`);
-              if (!privB64) {
-                console.warn('Missing buyer private key for key decryption');
-                break;
-              }
-              const priv = Uint8Array.from(atob(privB64), c => c.charCodeAt(0));
+              const priv = await readPrivateKey(opts.buyerAddress!);
+              if (!priv) { console.warn('Missing buyer private key for key decryption'); break; }
               const shared = x25519.getSharedSecret(priv, ownerPub);
               const sharedU8 = new Uint8Array(shared.length);
               for (let i = 0; i < shared.length; i++) sharedU8[i] = shared[i];
@@ -93,19 +148,20 @@ async function getEncryptionKey(
       return null;
     }
 
-    // Base64 decode
-    const keyBytes = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
+    // 5. 如果此时仍然有 Base64 形式的对称密钥（来自旧版本或其他来源），导入为 AES-GCM 密钥
+    if (keyB64) {
+      const keyBytes = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyBytes,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+      return cryptoKey;
+    }
 
-    // Import key
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      keyBytes,
-      { name: 'AES-GCM', length: 256 },
-      false,
-      ['decrypt']
-    );
-
-    return cryptoKey;
+    return null;
   } catch (error) {
     console.error('❌ Failed to get encryption key:', error);
     return null;
