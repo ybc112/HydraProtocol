@@ -81,10 +81,12 @@ export function useUploadData(): UseUploadDataReturn {
       );
       const iv = new Uint8Array(12);
       crypto.getRandomValues(iv);
+      // Ensure rawBuffer is a standard Uint8Array with ArrayBuffer
+      const dataBuffer = new Uint8Array(rawBuffer);
       const encryptedBuffer = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv },
         cryptoKey,
-        rawBuffer
+        dataBuffer
       );
       const ivAndCiphertext = new Uint8Array(iv.length + new Uint8Array(encryptedBuffer).length);
       ivAndCiphertext.set(iv, 0);

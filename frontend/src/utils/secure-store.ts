@@ -48,7 +48,9 @@ export async function savePrivateKey(address: string, priv: Uint8Array): Promise
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const pass = await promptPassphrase();
   const key = await deriveKey(pass, salt);
-  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, priv);
+  // Ensure priv is a standard Uint8Array with ArrayBuffer
+  const privBuffer = new Uint8Array(priv);
+  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, privBuffer);
   const payload = new Uint8Array(salt.length + iv.length + new Uint8Array(cipherBuf).length);
   payload.set(salt, 0);
   payload.set(iv, salt.length);
@@ -117,7 +119,9 @@ export async function saveSymmetricKey(blobId: string, symKey: Uint8Array): Prom
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const pass = await promptPassphrase();
   const key = await deriveKey(pass, salt);
-  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, symKey);
+  // Ensure symKey is a standard Uint8Array with ArrayBuffer
+  const symKeyBuffer = new Uint8Array(symKey);
+  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, symKeyBuffer);
   const payload = new Uint8Array(salt.length + iv.length + new Uint8Array(cipherBuf).length);
   payload.set(salt, 0);
   payload.set(iv, salt.length);
