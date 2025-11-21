@@ -85,7 +85,8 @@ export async function readPrivateKey(address: string): Promise<Uint8Array | null
   const cipher = payload.slice(28);
   const pass = await promptPassphrase();
   const key = await deriveKey(pass, salt);
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+  const cipherBuffer = new Uint8Array(cipher);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBuffer);
   return new Uint8Array(plain);
 }
 
@@ -152,7 +153,8 @@ export async function readSymmetricKey(blobId: string): Promise<Uint8Array | nul
   const cipher = payload.slice(28);
   const pass = await promptPassphrase();
   const key = await deriveKey(pass, salt);
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+  const cipherBuffer = new Uint8Array(cipher);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBuffer);
   return new Uint8Array(plain);
 }
 

@@ -30,9 +30,10 @@ async function getEncryptionKey(
     // Prefer secure local symmetric key (uploader scenario)
     const localSym = await readSymmetricKey(blobId);
     if (localSym) {
+      const localSymBuffer = new Uint8Array(localSym);
       const cryptoKey = await crypto.subtle.importKey(
         'raw',
-        localSym,
+        localSymBuffer,
         { name: 'AES-GCM', length: 256 },
         false,
         ['decrypt']
@@ -57,9 +58,10 @@ async function getEncryptionKey(
     try {
       const symFromSecure = await readSymmetricKey(blobId);
       if (symFromSecure) {
+        const symFromSecureBuffer = new Uint8Array(symFromSecure);
         const cryptoKey = await crypto.subtle.importKey(
           'raw',
-          symFromSecure,
+          symFromSecureBuffer,
           { name: 'AES-GCM', length: 256 },
           false,
           ['decrypt']
@@ -126,8 +128,10 @@ async function getEncryptionKey(
               for (let i = 0; i < shared.length; i++) sharedU8[i] = shared[i];
 
               // 使用共享密钥作为AES密钥，解密得到原始对称密钥
-              const aesKey = await crypto.subtle.importKey('raw', sharedU8, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-              const decryptedSym = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, cipher);
+              const sharedU8Buffer = new Uint8Array(sharedU8);
+              const aesKey = await crypto.subtle.importKey('raw', sharedU8Buffer, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+              const cipherBuffer = new Uint8Array(cipher);
+              const decryptedSym = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, cipherBuffer);
 
               const symKeyBytes = new Uint8Array(decryptedSym);
               const symKey = await crypto.subtle.importKey(
@@ -201,10 +205,12 @@ export async function downloadAndDecrypt(
 
     console.log(`🔓 Decrypting ${ciphertext.length} bytes...`);
 
+    // Ensure ciphertext is a standard Uint8Array with ArrayBuffer
+    const ciphertextBuffer = new Uint8Array(ciphertext);
     const decryptedBuffer = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
       cryptoKey,
-      ciphertext
+      ciphertextBuffer
     );
 
     console.log(`✅ Decrypted ${decryptedBuffer.byteLength} bytes`);
