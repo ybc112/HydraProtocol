@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@hydra/sdk": "file:../sdk/typescript",
     "@mysten/sui": "^1.44.0",
     "@suiet/wallet-kit": "^0.5.1",
     "@tailwindcss/postcss": "^4.1.17",

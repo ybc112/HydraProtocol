@@ -278,3 +278,204 @@ export function generateMockData(circuitType: 'average' | 'threshold'): number[]
     return Array.from({ length: 10 }, () => Math.floor(Math.random() * 100));
   }
 }
+
+/**
+ * Generate ZKP proof for Batch Average circuit
+ *
+ * @param data - Array of data values (must have 100 elements)
+ * @param batchId - Batch identifier
+ * @returns Proof and public signals
+ */
+export async function generateBatchAverageProof(
+  data: number[],
+  batchId: number
+): Promise<ProofResult> {
+  try {
+    console.log('🔐 Generating Batch Average ZKP proof...', { batchId, dataLength: data.length });
+
+    // Validate input
+    if (data.length !== 100) {
+      throw new Error(`Batch Average circuit expects 100 data points, got ${data.length}`);
+    }
+
+    // Prepare inputs for the circuit
+    const inputs = {
+      data: data.map(d => String(d)),
+      batchId: String(batchId)
+    };
+
+    console.log('Circuit inputs:', { ...inputs, data: `[${inputs.data.length} values]` });
+
+    // Generate proof using snarkjs
+    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+      inputs,
+      '/circuits/batch_average/batch_average.wasm',
+      '/circuits/batch_average/circuit_final.zkey'
+    );
+
+    console.log('✅ Batch Average proof generated successfully');
+    console.log('Public signals:', publicSignals);
+
+    return { proof, publicSignals };
+
+  } catch (error: any) {
+    console.error('❌ Failed to generate batch average proof:', error);
+    throw new Error(`Batch Average proof generation failed: ${error.message}`);
+  }
+}
+
+/**
+ * Generate ZKP proof for Aggregation circuit
+ *
+ * @param batchAverages - Array of batch averages (scaled by 100)
+ * @param batchCounts - Array of batch counts
+ * @param batchCommitments - Array of batch commitments
+ * @param numBatches - Number of valid batches
+ * @returns Proof and public signals
+ */
+export async function generateAggregationProof(
+  batchAverages: string[],
+  batchCounts: string[],
+  batchCommitments: string[],
+  numBatches: number
+): Promise<ProofResult> {
+  try {
+    console.log('🔐 Generating Aggregation ZKP proof...', { numBatches });
+
+    // Validate input
+    if (batchAverages.length !== 100 || batchCounts.length !== 100 || batchCommitments.length !== 100) {
+      throw new Error(`Aggregation circuit expects 100 elements in each array`);
+    }
+
+    // Prepare inputs for the circuit
+    const inputs = {
+      batchAverages,
+      batchCounts,
+      batchCommitments,
+      numBatches: String(numBatches)
+    };
+
+    console.log('Circuit inputs:', {
+      numBatches,
+      validBatches: batchAverages.slice(0, numBatches).length
+    });
+
+    // Generate proof using snarkjs
+    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+      inputs,
+      '/circuits/aggregation/aggregation.wasm',
+      '/circuits/aggregation/circuit_final.zkey'
+    );
+
+    console.log('✅ Aggregation proof generated successfully');
+    console.log('Public signals:', publicSignals);
+
+    return { proof, publicSignals };
+
+  } catch (error: any) {
+    console.error('❌ Failed to generate aggregation proof:', error);
+    throw new Error(`Aggregation proof generation failed: ${error.message}`);
+  }
+}
+
+/**
+ * Generate ZKP proof for Batch Threshold circuit
+ *
+ * @param data - Array of data values (must have 100 elements)
+ * @param threshold - Threshold value
+ * @param batchId - Batch identifier
+ * @param salt - Random salt
+ * @returns Proof and public signals
+ */
+export async function generateBatchThresholdProof(
+  data: number[],
+  threshold: number,
+  batchId: number,
+  salt: number
+): Promise<ProofResult> {
+  try {
+    console.log('🔐 Generating Batch Threshold ZKP proof...', { batchId, threshold });
+
+    // Validate input
+    if (data.length !== 100) {
+      throw new Error(`Batch Threshold circuit expects 100 data points, got ${data.length}`);
+    }
+
+    // Prepare inputs for the circuit
+    const inputs = {
+      data: data.map(d => String(d)),
+      threshold: String(threshold),
+      batchId: String(batchId),
+      salt: String(salt)
+    };
+
+    console.log('Circuit inputs:', { ...inputs, data: `[${inputs.data.length} values]` });
+
+    // Generate proof using snarkjs
+    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+      inputs,
+      '/circuits/batch_threshold/batch_threshold.wasm',
+      '/circuits/batch_threshold/circuit_final.zkey'
+    );
+
+    console.log('✅ Batch Threshold proof generated successfully');
+    console.log('Public signals:', publicSignals);
+
+    return { proof, publicSignals };
+
+  } catch (error: any) {
+    console.error('❌ Failed to generate batch threshold proof:', error);
+    throw new Error(`Batch Threshold proof generation failed: ${error.message}`);
+  }
+}
+
+/**
+ * Generate ZKP proof for Threshold Aggregation circuit
+ *
+ * @param batchCounts - Array of batch counts (number of items above threshold)
+ * @param batchCommitments - Array of batch commitments
+ * @param numBatches - Number of valid batches
+ * @returns Proof and public signals
+ */
+export async function generateThresholdAggregationProof(
+  batchCounts: string[],
+  batchCommitments: string[],
+  numBatches: number
+): Promise<ProofResult> {
+  try {
+    console.log('🔐 Generating Threshold Aggregation ZKP proof...', { numBatches });
+
+    // Validate input
+    if (batchCounts.length !== 100 || batchCommitments.length !== 100) {
+      throw new Error(`Threshold Aggregation circuit expects 100 elements in each array`);
+    }
+
+    // Prepare inputs for the circuit
+    const inputs = {
+      batchCounts,
+      batchCommitments,
+      numBatches: String(numBatches)
+    };
+
+    console.log('Circuit inputs:', {
+      numBatches,
+      validBatches: batchCounts.slice(0, numBatches).length
+    });
+
+    // Generate proof using snarkjs
+    const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+      inputs,
+      '/circuits/threshold_aggregation/threshold_aggregation.wasm',
+      '/circuits/threshold_aggregation/circuit_final.zkey'
+    );
+
+    console.log('✅ Threshold Aggregation proof generated successfully');
+    console.log('Public signals:', publicSignals);
+
+    return { proof, publicSignals };
+
+  } catch (error: any) {
+    console.error('❌ Failed to generate threshold aggregation proof:', error);
+    throw new Error(`Threshold Aggregation proof generation failed: ${error.message}`);
+  }
+}

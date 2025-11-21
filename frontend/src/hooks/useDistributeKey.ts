@@ -5,6 +5,7 @@ import { SuiClient } from '@mysten/sui/client';
 import { getHydraConfig, CONTRACT_ADDRESSES } from '../config/hydra';
 import { x25519 } from '@noble/curves/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
+import { readSymmetricKey, saveSymmetricKey } from '../utils/secure-store';
 
 export interface DistributeKeyParams {
   dataRecordId: string;
@@ -46,11 +47,37 @@ export function useDistributeKey() {
       const fields = record.data.content.fields as any;
       const blobId = fields.walrus_blob_id;
 
-      const keyB64 = localStorage.getItem(`hydra:blobKey:${blobId}`);
-      if (!keyB64) {
+      let symKey: Uint8Array | null = null;
+
+      // 优先从安全存储读取对称密钥
+      try {
+        symKey = await readSymmetricKey(blobId);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Failed to read local symmetric key';
+        return { success: false, error: msg };
+      }
+
+      // 兼容旧版本：从 localStorage 读取并尝试迁移到安全存储
+      if (!symKey) {
+        const legacyB64 = typeof window !== 'undefined'
+          ? localStorage.getItem(`hydra:blobKey:${blobId}`) || undefined
+          : undefined;
+        if (legacyB64) {
+          const legacyBytes = Uint8Array.from(atob(legacyB64), c => c.charCodeAt(0));
+          symKey = legacyBytes;
+          try {
+            await saveSymmetricKey(blobId, legacyBytes);
+            localStorage.removeItem(`hydra:blobKey:${blobId}`);
+            console.log(`✅ Migrated symmetric key for blob ${blobId} to secure store`);
+          } catch (e) {
+            console.warn('Failed to migrate symmetric key to secure store:', e);
+          }
+        }
+      }
+
+      if (!symKey) {
         return { success: false, error: 'Missing local symmetric key' };
       }
-      const symKey = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
 
       const eventType = `${CONTRACT_ADDRESSES.packageId}::data_registry::UserKeyRegistered`;
       const events = await client.queryEvents({ query: { MoveEventType: eventType }, limit: 200, order: 'descending' });

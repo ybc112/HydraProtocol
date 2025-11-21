@@ -2,7 +2,26 @@
  * HydraProtocol SDK Configuration for Frontend
  */
 
-import { HydraConfig } from '@hydra/sdk';
+/**
+ * Hydra Protocol Configuration Type
+ */
+export interface HydraConfig {
+  walrus?: {
+    binary?: string;
+    network?: 'testnet' | 'mainnet';
+    rpcUrl?: string;
+  };
+  sui?: {
+    network?: 'testnet' | 'mainnet';
+    packageId?: string;
+    dataRegistryId?: string;
+    marketplaceId?: string;
+    zkpRegistryId?: string;
+  };
+  circuits?: {
+    dir?: string;
+  };
+}
 
 /**
  * Get Hydra SDK configuration from environment variables

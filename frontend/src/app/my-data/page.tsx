@@ -10,6 +10,7 @@ import { useDistributeKey } from '../../hooks/useDistributeKey';
 import { Transaction } from '@mysten/sui/transactions';
 import { CONTRACT_ADDRESSES } from '../../config/hydra';
 import { x25519 } from '@noble/curves/ed25519';
+import { getOrCreatePrivateKey, exportPrivateKeyBase64, deletePrivateKey } from '../../utils/secure-store';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
@@ -31,15 +32,7 @@ export default function MyDataPage() {
     if (!wallet.connected || !wallet.account) return;
     try {
       const addr = wallet.account.address;
-      const privKeyB64 = localStorage.getItem(`hydra:encPrivKey:${addr}`);
-      let priv: Uint8Array;
-      if (!privKeyB64) {
-        priv = x25519.utils.randomPrivateKey();
-        const privB64 = btoa(String.fromCharCode(...priv));
-        localStorage.setItem(`hydra:encPrivKey:${addr}`, privB64);
-      } else {
-        priv = Uint8Array.from(atob(privKeyB64), c => c.charCodeAt(0));
-      }
+      const priv = await getOrCreatePrivateKey(addr, () => x25519.utils.randomPrivateKey());
       const pub = x25519.getPublicKey(priv);
       const tx = new Transaction();
       tx.moveCall({
@@ -49,8 +42,11 @@ export default function MyDataPage() {
           tx.pure.vector('u8', Array.from(pub)),
         ],
       });
-      await wallet.signAndExecuteTransaction({ transaction: tx });
+      const result = await wallet.signAndExecuteTransaction({ transaction: tx });
       setDistErrorMsg(null);
+      setDistResult(`✅ Public key registered successfully! TX: ${result.digest.slice(0, 20)}...`);
+      // 3秒后清除成功消息
+      setTimeout(() => setDistResult(null), 5000);
     } catch (e) {
       setDistErrorMsg(e instanceof Error ? e.message : 'Failed to register public key');
     }
@@ -127,8 +123,52 @@ export default function MyDataPage() {
                 </label>
                 <span className={`text-sm ${autoRunning ? 'text-emerald-400' : 'text-gray-400'}`}>{autoRunning ? 'Running' : 'Idle'}</span>
                 {autoError && <span className="text-sm text-yellow-400">{autoError}</span>}
-                <button onClick={handleRegisterMyPubkey} className="ml-auto px-3 py-2 rounded bg-slate-800 border border-slate-600 text-gray-200 hover:bg-slate-700">Register My Public Key</button>
+                <div className="ml-auto flex items-center gap-3">
+                  <button onClick={handleRegisterMyPubkey} className="px-3 py-2 rounded bg-slate-800 border border-slate-600 text-gray-200 hover:bg-slate-700">Register My Public Key</button>
+                  <button onClick={async () => {
+                    if (!wallet.account) return;
+                    try {
+                      const b64 = await exportPrivateKeyBase64(wallet.account.address);
+                      if (b64) {
+                        const blob = new Blob([b64], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = 'hydra-enc-privkey.txt'; a.click(); URL.revokeObjectURL(url);
+                        setDistResult('✅ Private key exported successfully!');
+                        setTimeout(() => setDistResult(null), 3000);
+                      } else {
+                        setDistErrorMsg('No private key found. Please register first.');
+                      }
+                    } catch (e) {
+                      setDistErrorMsg(e instanceof Error ? e.message : 'Failed to export key');
+                    }
+                  }} className="px-3 py-2 rounded bg-slate-800 border border-slate-600 text-gray-200 hover:bg-slate-700">Export Key</button>
+                  <button onClick={async () => {
+                    if (!wallet.account) return;
+                    if (!confirm('⚠️ This will delete your encryption private key. You will NOT be able to decrypt purchased data anymore. Continue?')) return;
+                    try {
+                      await deletePrivateKey(wallet.account.address);
+                      setDistResult('🗑️ Local private key cleared successfully');
+                      setTimeout(() => setDistResult(null), 3000);
+                      setDistErrorMsg(null);
+                    } catch (e) {
+                      setDistErrorMsg(e instanceof Error ? e.message : 'Failed to clear key');
+                    }
+                  }} className="px-3 py-2 rounded bg-red-900 border border-red-600 text-gray-200 hover:bg-red-800">Clear Key</button>
+                </div>
               </div>
+              
+              {/* Success/Error Messages */}
+              {distResult && (
+                <div className="max-w-6xl mx-auto mb-4 p-4 bg-emerald-900/20 border border-emerald-500/50 rounded-lg">
+                  <p className="text-emerald-400 text-sm">{distResult}</p>
+                </div>
+              )}
+              {distErrorMsg && (
+                <div className="max-w-6xl mx-auto mb-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg">
+                  <p className="text-red-400 text-sm">{distErrorMsg}</p>
+                </div>
+              )}
               {/* Key Distribution */}
               <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-6xl mx-auto mb-8">
                 <h2 className="text-xl font-bold text-white mb-2">Distribute Keys to Buyers</h2>

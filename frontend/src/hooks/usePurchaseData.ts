@@ -10,6 +10,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import { SuiClient } from '@mysten/sui/client';
 import { getHydraConfig, CONTRACT_ADDRESSES } from '../config/hydra';
 import { x25519 } from '@noble/curves/ed25519';
+import { getOrCreatePrivateKey } from '../utils/secure-store';
 
 export interface PurchaseResult {
   success: boolean;
@@ -96,22 +97,17 @@ export function usePurchaseData(): UsePurchaseDataReturn {
 
       // Ensure user encryption pubkey is registered
       try {
-        const privKeyB64 = localStorage.getItem(`hydra:encPrivKey:${wallet.account.address}`);
-        if (!privKeyB64) {
-          const priv = x25519.utils.randomPrivateKey();
-          const pub = x25519.getPublicKey(priv);
-          const privB64 = btoa(String.fromCharCode(...priv));
-          localStorage.setItem(`hydra:encPrivKey:${wallet.account.address}`, privB64);
-          const txReg = new Transaction();
-          txReg.moveCall({
-            target: `${CONTRACT_ADDRESSES.packageId}::data_registry::register_user_pubkey`,
-            arguments: [
-              txReg.object(CONTRACT_ADDRESSES.dataRegistryId!),
-              txReg.pure.vector('u8', Array.from(pub)),
-            ],
-          });
-          await wallet.signAndExecuteTransaction({ transaction: txReg });
-        }
+        const priv = await getOrCreatePrivateKey(wallet.account.address, () => x25519.utils.randomPrivateKey());
+        const pub = x25519.getPublicKey(priv);
+        const txReg = new Transaction();
+        txReg.moveCall({
+          target: `${CONTRACT_ADDRESSES.packageId}::data_registry::register_user_pubkey`,
+          arguments: [
+            txReg.object(CONTRACT_ADDRESSES.dataRegistryId!),
+            txReg.pure.vector('u8', Array.from(pub)),
+          ],
+        });
+        await wallet.signAndExecuteTransaction({ transaction: txReg });
       } catch (e) {
         console.warn('Failed to register encryption pubkey', e);
       }

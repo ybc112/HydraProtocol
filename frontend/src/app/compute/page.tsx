@@ -6,6 +6,7 @@ import { useMyPurchases } from '../../hooks/useMyPurchases';
 import { useSubmitComputation } from '../../hooks/useSubmitComputation';
 import { useVerifyProof } from '../../hooks/useVerifyProof';
 import { useCircuitVerificationKeys } from '../../hooks/useCircuitVerificationKeys';
+import { useBatchComputation } from '../../hooks/useBatchComputation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import {
@@ -47,6 +48,20 @@ export default function ComputePage() {
   const [resultMemo, setResultMemo] = useState('');
   const [selectedColumn, setSelectedColumn] = useState<string>('');
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
+  
+  // Batch computation mode
+  const [computeMode, setComputeMode] = useState<'auto' | 'quick' | 'batch'>('auto');
+  const [dataCount, setDataCount] = useState(0);
+  const { 
+    computeBatch, 
+    isProcessing: isBatchProcessing,
+    progress: batchProgress,
+    currentBatch: batchCurrentBatch,
+    totalBatches: batchTotalBatches,
+    statusMessage: batchStatusMessage,
+    batchResults: batchResultsData,
+    error: batchError 
+  } = useBatchComputation();
 
   const handleDataSelect = (dataRecordId: string) => {
     if (selectedDataIds.includes(dataRecordId)) {
@@ -100,6 +115,12 @@ export default function ComputePage() {
             setAvailableColumns(parsed.headers);
             const defCol = chooseDefaultNumericColumn(parsed.headers);
             if (defCol) setSelectedColumn(defCol);
+            
+            // Detect data count for mode recommendation
+            const targetCol = defCol || parsed.headers[0];
+            const numbers = parsed.columns[targetCol] || [];
+            setDataCount(numbers.length);
+            console.log(`📊 Detected ${numbers.length} data points`);
           }
         }
       } catch (err) {
@@ -109,6 +130,156 @@ export default function ComputePage() {
 
     detectColumns();
   }, [selectedDataIds, wallet.connected, wallet.account]);
+
+  // Batch computation handler
+  const handleBatchCompute = async () => {
+    try {
+      setError(null);
+      setResult(null);
+      setDataPreview(null);
+      setIsGeneratingProof(true);
+
+      console.log('🔐 Starting batch computation...');
+
+      // Fetch and parse real data from Walrus
+      const config = getHydraConfig();
+      const client = new SuiClient({
+        url: config.sui?.network === 'testnet'
+          ? 'https://fullnode.testnet.sui.io:443'
+          : 'https://fullnode.mainnet.sui.io:443'
+      });
+
+      const allNumbers: number[] = [];
+
+      // Download and parse each selected dataset
+      for (const dataRecordId of selectedDataIds) {
+        const recordObject = await client.getObject({
+          id: dataRecordId,
+          options: { showContent: true }
+        });
+
+        if (!recordObject.data?.content || !('fields' in recordObject.data.content)) {
+          continue;
+        }
+
+        const fields = recordObject.data.content.fields as any;
+        const blobId = fields.walrus_blob_id;
+
+        const decryptedBuffer = await downloadAndDecrypt(
+          blobId,
+          undefined,
+          { dataRecordId, buyerAddress: wallet.account!.address }
+        );
+
+        if (decryptedBuffer) {
+          const parsed = parseCsvColumns(decryptedBuffer);
+          const targetCol = selectedColumn || chooseDefaultNumericColumn(parsed.headers) || parsed.headers[0];
+          const numbers = parsed.columns[targetCol] || [];
+          allNumbers.push(...numbers);
+        }
+      }
+
+      if (allNumbers.length === 0) {
+        throw new Error('No data extracted from selected datasets');
+      }
+
+      console.log(`📊 Total data points: ${allNumbers.length}`);
+      setDataPreview(`Total data points: ${allNumbers.length}\nUsing Batch Mode for large dataset`);
+
+      // Execute batch computation
+      const batchResult = await computeBatch({
+        circuitType: circuitType,
+        data: allNumbers,
+        threshold: circuitType === 'threshold' ? parseInt(thresholdValue) : undefined
+      });
+
+      setIsGeneratingProof(false);
+
+      if (!batchResult) {
+        throw new Error('Batch computation returned no result');
+      }
+
+      console.log('✅ Proof generated, submitting to blockchain...');
+
+      // Encode proof and public signals for smart contract
+      const proofBytes = encodeProofToBytes(batchResult.proof);
+      const publicInputsBytes = encodePublicSignalsToBytes(batchResult.publicSignals);
+
+      console.log('Proof size:', proofBytes.length, 'bytes');
+      console.log('Public inputs:', batchResult.publicSignals);
+
+      // Prepare metadata
+      const avgValue = batchResult.finalAverage;
+      const autoTitle = circuitType === 'average' 
+        ? 'Batch Average Computation' 
+        : 'Batch Threshold Query';
+      
+      const metadata = JSON.stringify({
+        circuitType: `batch_${circuitType}`,
+        params: circuitType === 'threshold' ? { threshold: thresholdValue } : {},
+        computedAt: new Date().toISOString(),
+        result: circuitType === 'average' 
+          ? `Average: ${avgValue?.toFixed(2)}` 
+          : `Count: ${batchResult.totalCount}`,
+        commitment: batchResult.commitment,
+        dataSource: 'real',
+        batchCount: batchResult.batchResults?.length || 0,
+        totalDataPoints: batchResult.totalCount,
+        dataPreview: dataPreview || 'No preview available',
+        title: (resultTitle && resultTitle.trim().length > 0) ? resultTitle.trim() : autoTitle,
+        memo: resultMemo || ''
+      });
+
+      // Submit to smart contract
+      const { txDigest, resultObjectId } = await submitComputation({
+        circuitName: circuitType === 'average' ? 'batch_average' : 'batch_threshold',
+        proof: proofBytes,
+        publicInputs: publicInputsBytes,
+        dataRecordIds: selectedDataIds,
+        metadata
+      });
+
+      console.log('🔍 Verifying proof on-chain...');
+
+      // Get verification key ID for batch circuit
+      const vkId = getVkIdByCircuit(
+        circuitType === 'average' ? 'batch_average' : 'batch_threshold'
+      );
+      
+      if (!vkId) {
+        throw new Error(`Verification key not found for batch ${circuitType} circuit`);
+      }
+
+      // Automatically verify the proof
+      try {
+        const verifyTxDigest = await verifyProof({
+          resultObjectId,
+          vkObjectId: vkId,
+          circuitName: circuitType === 'average' ? 'batch_average' : 'batch_threshold'
+        });
+
+        const summary = circuitType === 'average'
+          ? `Average: ${avgValue?.toFixed(2)}\nTotal Count: ${batchResult.totalCount}\nBatches Processed: ${batchResult.batchResults?.length || 0}`
+          : `Count: ${batchResult.totalCount}\nBatches Processed: ${batchResult.batchResults?.length || 0}`;
+
+        setResult(`✅ Batch computation successful and verified!\n\n${summary}\n\nCommitment: ${batchResult.commitment}\n\nSubmit TX: ${txDigest.substring(0, 20)}...\nVerify TX: ${verifyTxDigest.substring(0, 20)}...\n\n✨ Status: VERIFIED`);
+        
+      } catch (verifyErr) {
+        console.error('⚠️ Verification failed:', verifyErr);
+        
+        const summary = circuitType === 'average'
+          ? `Average: ${avgValue?.toFixed(2)}\nTotal Count: ${batchResult.totalCount}\nBatches Processed: ${batchResult.batchResults?.length || 0}`
+          : `Count: ${batchResult.totalCount}\nBatches Processed: ${batchResult.batchResults?.length || 0}`;
+
+        setResult(`⚠️ Computation submitted but verification failed\n\n${summary}\n\nCommitment: ${batchResult.commitment}\n\nTransaction: ${txDigest.substring(0, 20)}...\n\nVerification error: ${verifyErr instanceof Error ? verifyErr.message : 'Unknown error'}\n\n⏳ Status: PENDING`);
+      }
+
+    } catch (err) {
+      console.error('Batch computation failed:', err);
+      setError(err instanceof Error ? err.message : 'Batch computation failed');
+      setIsGeneratingProof(false);
+    }
+  };
 
   const handleCompute = async () => {
     if (selectedDataIds.length === 0) {
@@ -121,13 +292,20 @@ export default function ComputePage() {
       return;
     }
 
+    // Determine which mode to use
+    const shouldUseBatch = computeMode === 'batch' || (computeMode === 'auto' && dataCount > 10);
+    
+    if (shouldUseBatch) {
+      return handleBatchCompute();
+    }
+
     try {
       setError(null);
       setResult(null);
       setDataPreview(null);
       setIsGeneratingProof(true);
 
-      console.log('🔐 Generating ZKP proof...');
+      console.log('🔐 Generating ZKP proof (Quick Mode)...');
 
       // Fetch and parse real data from Walrus
       let circuitInput: number[];
@@ -535,6 +713,70 @@ Verification error: ${verifyErr instanceof Error ? verifyErr.message : 'Unknown 
                       </div>
                     )}
 
+                    {/* Computation Mode Selection */}
+                    {dataCount > 0 && (
+                      <div className="mt-4 p-4 bg-slate-700/50 border border-slate-600 rounded-lg">
+                        <label className="block text-sm font-medium text-gray-300 mb-3">
+                          Computation Mode
+                          <span className="ml-2 text-xs text-emerald-400">
+                            ({dataCount} data points detected)
+                          </span>
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              checked={computeMode === 'auto'}
+                              onChange={() => setComputeMode('auto')}
+                              className="w-4 h-4 text-emerald-500"
+                            />
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-white">
+                                🎯 Auto (Recommended)
+                              </span>
+                              <p className="text-xs text-gray-400">
+                                {dataCount <= 10 ? 'Quick mode for small datasets' : 'Batch mode for large datasets'}
+                              </p>
+                            </div>
+                          </label>
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              checked={computeMode === 'quick'}
+                              onChange={() => setComputeMode('quick')}
+                              className="w-4 h-4 text-emerald-500"
+                            />
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-white">
+                                ⚡ Quick Mode
+                              </span>
+                              <p className="text-xs text-gray-400">
+                                {dataCount <= 10 ? '1-2 seconds' : `Sample ${circuitType === 'average' ? '3' : '10'} points from ${dataCount}`}
+                              </p>
+                            </div>
+                          </label>
+                          {dataCount > 10 && (
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                              <input
+                                type="radio"
+                                checked={computeMode === 'batch'}
+                                onChange={() => setComputeMode('batch')}
+                                className="w-4 h-4 text-emerald-500"
+                              />
+                              <div className="flex-1">
+                                <span className="text-sm font-medium text-white">
+                                  📊 Batch Mode
+                                </span>
+                                <p className="text-xs text-gray-400">
+                                  Process all {dataCount} points (10-30s)
+                                </p>
+                              </div>
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Data Source Toggle */}
                     <div className="mt-4">
                       <label className="flex items-center space-x-3 cursor-pointer">
@@ -655,6 +897,39 @@ Verification error: ${verifyErr instanceof Error ? verifyErr.message : 'Unknown 
                         </>
                       )}
                     </button>
+
+                    {/* Batch Progress Display */}
+                    {isBatchProcessing && batchTotalBatches > 0 && (
+                      <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/50 rounded-lg">
+                        <div className="flex items-center gap-3 mb-3">
+                          <svg className="animate-spin h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span className="font-semibold text-blue-400">
+                            {batchStatusMessage || 'Processing...'}
+                          </span>
+                        </div>
+                        
+                        {batchCurrentBatch > 0 && (
+                          <>
+                            <div className="flex justify-between text-sm text-gray-300 mb-2">
+                              <span>Batch {batchCurrentBatch} of {batchTotalBatches}</span>
+                              <span>{Math.round((batchCurrentBatch / batchTotalBatches) * 100)}%</span>
+                            </div>
+                            <div className="w-full bg-slate-700 rounded-full h-2">
+                              <div 
+                                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${(batchCurrentBatch / batchTotalBatches) * 100}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-2">
+                              📊 Progress: {batchProgress}%
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Result Display */}
