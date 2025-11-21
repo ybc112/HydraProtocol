@@ -23,8 +23,10 @@ export async function openSecureDB(): Promise<IDBDatabase> {
 async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const base = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  // Ensure salt is a standard Uint8Array with ArrayBuffer
+  const saltBuffer = new Uint8Array(salt);
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt: saltBuffer, iterations: 100000, hash: 'SHA-256' },
     base,
     { name: 'AES-GCM', length: 256 },
     false,
