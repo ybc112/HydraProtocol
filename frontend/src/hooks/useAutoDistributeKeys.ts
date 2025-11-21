@@ -112,7 +112,9 @@ export function useAutoDistributeKeys(enabled: boolean) {
 
             const iv = crypto.getRandomValues(new Uint8Array(12));
             const aesKey = await crypto.subtle.importKey('raw', sharedU8, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
-            const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, symKey);
+            // Ensure symKey is a standard Uint8Array with ArrayBuffer
+            const symKeyBuffer = new Uint8Array(symKey);
+            const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, symKeyBuffer);
             const cipher = new Uint8Array(cipherBuf);
             const payload = new Uint8Array(ownerPub.length + iv.length + cipher.length);
             payload.set(ownerPub, 0);
